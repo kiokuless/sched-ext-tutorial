@@ -5,7 +5,7 @@ STEP ?= 01
 MODE ?= partial
 CASE ?= step
 
-.PHONY: vm-up vm-mount vm-bootstrap vm-shell vm-stop doctor build run bench reset restore verify-checkpoints docs test check
+.PHONY: vm-up vm-mount vm-bootstrap vm-shell vm-stop doctor build run bench reset restore verify-checkpoints docs combine-docs test check
 
 vm-up:
 	VM_NAME="$(VM_NAME)" ./scripts/vm-up.sh
@@ -45,6 +45,9 @@ verify-checkpoints:
 
 docs:
 	mdbook build
+
+combine-docs:
+	./scripts/combine-docs.sh
 
 test:
 	cargo test --workspace
