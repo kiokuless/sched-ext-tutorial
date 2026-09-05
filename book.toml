@@ -1,0 +1,13 @@
+[book]
+authors = ["kiokuless"]
+language = "ja"
+src = "src"
+title = "Linux上で動くオレオレCPUスケジューラを作ろう"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/kiokuless/sched-ext-tutorial"
+edit-url-template = "https://github.com/kiokuless/sched-ext-tutorial/edit/main/{path}"

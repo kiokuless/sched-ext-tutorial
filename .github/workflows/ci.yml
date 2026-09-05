@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  host-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.95.0
+          components: rustfmt
+      - name: Install mdBook
+        run: cargo install mdbook --version 0.5.4 --locked
+      - name: Check the book and host tools
+        run: make check
+
+  scheduler-builds:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.95.0
+      - name: Install BPF build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes bpftool clang-19 libbpf-dev libelf-dev pkg-config
+      - name: Build every scheduler checkpoint
+        env:
+          BPF_CLANG: clang-19
+        run: |
+          for manifest in lab/Cargo.toml checkpoints/*/Cargo.toml; do
+            target=${manifest%/Cargo.toml}
+            target=${target//\//-}
+            CARGO_TARGET_DIR="target/ci-$target" cargo build --release --manifest-path "$manifest"
+          done
