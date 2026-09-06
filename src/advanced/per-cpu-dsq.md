@@ -11,12 +11,14 @@ CPU を移ると、前回の CPU で温まっていたキャッシュをその�
 
 本編の共有 DSQ と、CPU ごとに待ち行列を持つ構成を概念的に比べると次のようになる。
 
-| 構成 | 待ち行列 | CPU の決まり方 | 期待する性質 |
-| --- | --- | --- | --- |
-| 共有 DSQ | 複数 CPU が同じ列を利用 | 空いた CPU が仕事を取りやすい | 分散しやすい |
-| CPU ごとの DSQ | CPU ごとに列を分ける | `select_cpu` などの配置判断を強く反映する | locality を意識しやすい |
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="共有 DSQ と CPU ごとの DSQ の比較（横スクロール可能）">
+<img src="../images/shared-per-cpu-dsq.svg" alt="共有 DSQ では CPU 0 と CPU 1 が同じ待ち行列からタスクを受け取る。CPU ごとの DSQ では、それぞれの CPU が自分の待ち行列からタスクを受け取る。">
+</div>
+<figcaption>A〜C はタスク。右は CPU ごとに独自 DSQ を用意する構成で、両側ともローカル DSQ と callback は省略している。</figcaption>
+</figure>
 
-この表は「どちらが速いか」を決めるものではない。
+この構成の違いだけで「どちらが速いか」は決まらない。
 短いタスクが大量に到着し、空いた CPU をすぐ使いたい workload と、同じタスクが繰り返し CPU を使い、キャッシュの再利用が効く workload では評価が変わる。
 
 ## 何を測るか

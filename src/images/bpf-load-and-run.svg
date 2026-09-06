@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="696" viewBox="0 0 760 696" role="img" aria-labelledby="title desc">
+<title id="title">BPF のロードと実行の場所</title>
+<desc id="desc">ロード時はユーザ空間のプログラムが BPF プログラムをカーネルへ渡し、verifier が検査する。検査を通過し sched_ext に接続した後は、カーネルが自作 BPF の callback を呼び、スケジューリングの判断に利用する。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker></defs>
+<rect width="760" height="696" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">自作スケジューラは、どこで動くか</text>
+<text x="28" y="69" font-size="19" fill="#172b3a" text-anchor="start" font-weight="600">① 読み込むとき</text>
+<rect x="28" y="88" width="704" height="109" rx="9" fill="#eef2f5"/>
+<text x="46" y="115" font-size="16" fill="#526575" text-anchor="start" font-weight="600">ユーザ空間</text>
+<rect x="48" y="133" width="290" height="46" rx="9" fill="#fff"/>
+<text x="193" y="162" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="400">自作の BPF プログラム</text>
+<path d="M 343 156 H 418" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="430" y="133" width="280" height="46" rx="9" fill="#fff"/>
+<text x="570" y="162" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="400">ロードするプログラム</text>
+<path d="M 570 180 V 239" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="584" y="220" font-size="15" fill="#526575" text-anchor="start" font-weight="400">ロード</text>
+<rect x="28" y="241" width="704" height="130" rx="9" fill="#f0f6fc"/>
+<text x="46" y="270" font-size="16" fill="#1761a0" text-anchor="start" font-weight="600">カーネル</text>
+<rect x="48" y="287" width="265" height="58" rx="9" fill="#fff"/>
+<text x="180" y="311" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">検査済みの BPF プログラム</text>
+<text x="180" y="333" font-size="15" fill="#172b3a" text-anchor="middle" font-weight="400">sched_ext に接続して使う</text>
+<rect x="430" y="287" width="280" height="58" rx="9" fill="#fff"/>
+<text x="570" y="311" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">verifier</text>
+<text x="570" y="333" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">実行してよいか検査</text>
+<path d="M 426 316 H 319" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="370" y="303" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">通過</text>
+<text x="28" y="410" font-size="19" fill="#172b3a" text-anchor="start" font-weight="600">② 接続後、スケジューリングするとき</text>
+<rect x="28" y="430" width="704" height="209" rx="9" fill="#f0f6fc"/>
+<text x="46" y="459" font-size="16" fill="#1761a0" text-anchor="start" font-weight="600">カーネル内で呼び出す</text>
+<rect x="48" y="480" width="252" height="65" rx="9" fill="#fff"/>
+<text x="174" y="507" font-size="19" fill="#172b3a" text-anchor="middle" font-weight="600">sched_ext</text>
+<text x="174" y="532" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">CPU の候補を選ぶ場面など</text>
+<rect x="436" y="480" width="274" height="65" rx="9" fill="#e8f0fb"/>
+<text x="573" y="507" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">自作 BPF の callback</text>
+<text x="573" y="532" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">選び方や順番を決める</text>
+<path d="M 306 507 H 429" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="368" y="491" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">呼び出す</text>
+<path d="M 573 551 V 594 H 175 V 551" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="374" y="621" font-size="17" fill="#172b3a" text-anchor="middle" font-weight="400">自作の方針をカーネルの判断に反映</text>
+<text x="28" y="673" font-size="16" fill="#172b3a" text-anchor="start" font-weight="400">読み込む操作はユーザ空間から行い、BPF の実行はカーネル内で行う。</text>
+
+</g></svg>

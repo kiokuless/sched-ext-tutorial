@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="500" viewBox="0 0 760 500" role="img" aria-labelledby="title desc">
+<title id="title">wakeup と処理再開の違い</title>
+<desc id="desc">タスク A は sleep(1) でタイマーを待ち、wakeup で実行可能になる。この例では CPU 上でタスク B が動いているため、A はさらに CPU を待ち、順番が来てから処理を再開する。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker></defs>
+<rect width="760" height="500" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">sleep(1) から処理が再開するまで</text>
+<text x="28" y="68" font-size="16" fill="#526575" text-anchor="start" font-weight="400">一つの論理 CPU を、タスク A と B が使う例</text>
+<text x="152" y="110" font-size="17" fill="#172b3a" text-anchor="middle" font-weight="600">sleep(1)</text>
+<text x="152" y="133" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">を呼ぶ</text>
+<path d="M 152 145 V 326" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="370" y="110" font-size="17" fill="#172b3a" text-anchor="middle" font-weight="600">wakeup</text>
+<text x="370" y="133" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">実行可能になる</text>
+<path d="M 370 145 V 326" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="614" y="110" font-size="17" fill="#172b3a" text-anchor="middle" font-weight="600">CPU を得る</text>
+<text x="614" y="133" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">処理を再開</text>
+<path d="M 614 145 V 326" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="28" y="193" font-size="17" fill="#172b3a" text-anchor="start" font-weight="600">タスク A</text>
+<rect x="152" y="160" width="218" height="58" rx="9" fill="#eef2f5"/>
+<text x="261.0" y="195" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">タイマー待ち</text>
+<rect x="370" y="160" width="244" height="58" rx="9" fill="#fff0d7"/>
+<text x="492.0" y="195" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">実行可能だが CPU 待ち</text>
+<rect x="614" y="160" width="116" height="58" rx="9" fill="#e3f5f0"/>
+<text x="672.0" y="195" font-size="16" fill="#172b3a" text-anchor="middle" font-weight="400">実行中</text>
+<text x="28" y="284" font-size="17" fill="#172b3a" text-anchor="start" font-weight="600">CPU 上</text>
+<rect x="152" y="251" width="462" height="58" rx="9" fill="#e8f0fb"/>
+<text x="383" y="286" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="400">タスク B を実行</text>
+<rect x="614" y="251" width="116" height="58" rx="9" fill="#e3f5f0"/>
+<text x="672" y="286" font-size="17" fill="#172b3a" text-anchor="middle" font-weight="400">タスク A</text>
+<path d="M 152 332 H 734" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="730" y="356" font-size="15" fill="#526575" text-anchor="end" font-weight="400">時間</text>
+<path d="M 370 366 V 380 H 614 V 366" fill="none" stroke="#b36b00" stroke-width="2"/>
+<text x="492" y="411" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">順番が来るまでの待ち時間</text>
+<text x="28" y="451" font-size="16" fill="#172b3a" text-anchor="start" font-weight="400">wakeup は「実行できる状態になる」こと。CPU を得るまで待つ場合がある。</text>
+<text x="28" y="479" font-size="15" fill="#526575" text-anchor="start" font-weight="400">模式図。タイマー満了から wakeup までの詳細は省略し、長さは実測値を表さない。</text>
+
+</g></svg>

@@ -12,6 +12,13 @@ partial mode で安全に見えた方針が、system-wide mode でも使いや�
 shell は入力を待つ時間が長く、実行可能になったらすぐ応答してほしい一方、コンパイラは長く CPU を使いたい。
 同じ FIFO に異なる要求のタスクが入ると、一つの周期タスクを測るだけでは見えなかった使い勝手も評価の対象になる。
 
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="partial mode と system-wide mode の適用範囲（横スクロール可能）">
+<img src="../images/partial-system-wide.svg" alt="partial mode では実験対象だけが自作 sched_ext scheduler に入り、shell とサービスは fair class に残る。system-wide mode では shell、サービス、コンパイラ、実験対象が自作 scheduler の対象になる。">
+</div>
+<figcaption>同じタスクを左右で比較。リアルタイムクラスなど、sched_ext の対象外は省略している。</figcaption>
+</figure>
+
 短いスライスの checkpoint を system-wide mode で起動する。
 
 ```console

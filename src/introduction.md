@@ -13,6 +13,13 @@
 普段の Linux ではこの遅れは小さい。
 しかし、スケジューラ側の判断を変えれば、同じ `sleep(1)` の遅れを意図的に大きくできる。
 
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="wakeup と処理再開の違い（横スクロール可能）">
+<img src="images/wakeup-to-running.svg" alt="タスク A はタイマー待ちから wakeup で実行可能になる。この例ではタスク B が CPU を使っているため、A はさらに CPU を待ってから処理を再開する。">
+</div>
+<figcaption>wakeup と処理再開の違い。黄色の区間が、実行可能になってから CPU を待つ時間に当たる。狭い画面では図を横にスクロールできる。</figcaption>
+</figure>
+
 その判断を自分の手で書くために使うのが、Linux の **`sched_ext`** である。
 `sched_ext` は、BPF で記述した CPU スケジューラを実行時にカーネルへ読み込む仕組みである。
 カーネルを変更して再起動しなくても、タスクをどの順番で、どの CPU で、どれだけの時間動かすかを差し替えられる。
@@ -28,24 +35,16 @@ BPF プログラムをロードすると、まずカーネルの **verifier** �
 ロードされたプログラムが使える機能も、program type や実行される場所に応じて制限されている。
 検査を通過したプログラムだけがカーネル側で実行され、許可された helper や kfunc を通してカーネルの状態を参照したり、判断に影響を与えたりできる。
 
-```text
-user space
-    |
-    | load
-    v
-BPF program
-    |
-    | verifier
-    v
-kernel hook / callback
-    |
-    v
-kernel の判断に参加する
-```
-
 `sched_ext` では、CPU の候補を選ぶときや、次に実行するタスクを求めるときに、このプログラムが呼ばれる。
 このように、決められたタイミングで呼ばれる関数を **callback** と呼ぶ。
 自分で書いた数行が実際のスケジューリング経路に入り、周期タスクの再開時刻へ影響する。
+
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="BPF のロードと実行の場所（横スクロール可能）">
+<img src="images/bpf-load-and-run.svg" alt="ユーザ空間から BPF プログラムをロードすると、カーネルの verifier が検査する。検査を通過し sched_ext に接続した後は、カーネル内で自作 BPF の callback が呼ばれ、スケジューリングの判断に参加する。">
+</div>
+<figcaption>BPF のロードと実行の場所。verifier によるロード時の検査と、接続後の callback の呼び出しは、別の段階で行われる。</figcaption>
+</figure>
 
 このハンズオンでは、タスクを到着順に扱う **FIFO** スケジューラをロードし、1秒周期のタスクを意図的に遅らせる。
 次にタイムスライスを短くして、遅延とコンテキストスイッチ数がどう動くかを観測する。

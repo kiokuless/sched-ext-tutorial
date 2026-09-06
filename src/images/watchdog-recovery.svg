@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="380" viewBox="0 0 760 380" role="img" aria-labelledby="title desc">
+<title id="title">watchdog による復帰</title><desc id="desc">上段はタスクが enqueue から DSQ に進めず停滞する状態。カーネルの watchdog が停滞を検出し自作 scheduler を解除すると、下段のようにタスクが fair class で再び CPU を得る。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker></defs>
+<rect width="760" height="380" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+<text x="74" y="37" text-anchor="middle" font-size="20" fill="#172b3a">停滞</text>
+<text x="320" y="37" text-anchor="middle" font-size="16" fill="#a25c12">自作 scheduler</text>
+<rect x="28" y="58" width="118" height="62" rx="8" fill="#fff0d7" stroke="#a25c12"/>
+<text x="87" y="96" text-anchor="middle" font-size="18" fill="#172b3a">タスク</text>
+<path d="M 150 89 H 240" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="247" y="58" width="146" height="62" rx="8" fill="#fff0d7" stroke="#a25c12"/>
+<text x="320" y="96" text-anchor="middle" font-size="18" fill="#172b3a">enqueue</text>
+<path d="M 398 89 H 436 M 470 89 H 504 M 608 89 H 638" stroke="#a9bbc6" stroke-width="2" stroke-dasharray="5 5"/><path d="M 444 80 L 462 98 M 462 80 L 444 98" stroke="#a25c12" stroke-width="3"/>
+<rect x="510" y="58" width="92" height="62" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="556" y="96" text-anchor="middle" font-size="18" fill="#526575">DSQ</text>
+<rect x="644" y="58" width="88" height="62" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="688" y="96" text-anchor="middle" font-size="18" fill="#526575">CPU</text>
+<path d="M 320 123 V 165" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="213" y="170" width="214" height="60" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="320" y="206" text-anchor="middle" font-size="18" fill="#172b3a">watchdog</text>
+<text x="582" y="193" text-anchor="middle" font-size="17" fill="#172b3a">停滞を検出</text>
+<text x="582" y="220" text-anchor="middle" font-size="17" fill="#172b3a">自作 scheduler を解除</text>
+<path d="M 320 234 V 282" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="74" y="273" text-anchor="middle" font-size="20" fill="#087f75">復帰</text>
+<rect x="28" y="290" width="118" height="62" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="87" y="328" text-anchor="middle" font-size="18" fill="#172b3a">タスク</text>
+<path d="M 150 321 H 240" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="247" y="290" width="146" height="62" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="320" y="328" text-anchor="middle" font-size="18" fill="#172b3a">fair class</text>
+<path d="M 398 321 H 637" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="644" y="290" width="88" height="62" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="688" y="328" text-anchor="middle" font-size="18" fill="#172b3a">CPU</text>
+</g>
+</svg>

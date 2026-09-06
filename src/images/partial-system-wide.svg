@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="360" viewBox="0 0 760 360" role="img" aria-labelledby="title desc">
+<title id="title">partial と system-wide の適用範囲</title><desc id="desc">同じ五つのタスクを左右で比較。partial では periodic と hog だけが自作 scheduler に入り、shell とサービスは fair class に残る。system-wide では五つとも自作 scheduler に入る。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker></defs>
+<rect width="760" height="360" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+<text x="199" y="43" text-anchor="middle" font-size="22" fill="#172b3a">partial</text>
+<text x="561" y="43" text-anchor="middle" font-size="22" fill="#172b3a">system-wide</text>
+<rect x="28" y="68" width="342" height="120" rx="8" fill="#e7f1fc" stroke="#1761a0"/>
+<rect x="28" y="208" width="342" height="120" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<rect x="390" y="68" width="342" height="260" rx="8" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="199" y="99" text-anchor="middle" font-size="18" fill="#1761a0">自作 scheduler</text>
+<text x="199" y="239" text-anchor="middle" font-size="18" fill="#526575">fair class</text>
+<text x="561" y="99" text-anchor="middle" font-size="18" fill="#1761a0">自作 scheduler</text>
+<rect x="48" y="119" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="96" y="147" text-anchor="middle" font-size="17" fill="#172b3a">periodic</text>
+<rect x="151" y="119" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="199" y="147" text-anchor="middle" font-size="17" fill="#172b3a">hog A</text>
+<rect x="254" y="119" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="302" y="147" text-anchor="middle" font-size="17" fill="#172b3a">hog B</text>
+<rect x="48" y="259" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="96" y="287" text-anchor="middle" font-size="17" fill="#172b3a">shell</text>
+<rect x="151" y="259" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="199" y="287" text-anchor="middle" font-size="17" fill="#172b3a">サービス</text>
+<rect x="410" y="119" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="458" y="147" text-anchor="middle" font-size="17" fill="#172b3a">periodic</text>
+<rect x="513" y="119" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="561" y="147" text-anchor="middle" font-size="17" fill="#172b3a">hog A</text>
+<rect x="616" y="119" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="664" y="147" text-anchor="middle" font-size="17" fill="#172b3a">hog B</text>
+<rect x="410" y="259" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="458" y="287" text-anchor="middle" font-size="17" fill="#172b3a">shell</text>
+<rect x="513" y="259" width="96" height="44" rx="8" fill="#fff" stroke="none"/>
+<text x="561" y="287" text-anchor="middle" font-size="17" fill="#172b3a">サービス</text>
+</g>
+</svg>

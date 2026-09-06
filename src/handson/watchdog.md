@@ -19,21 +19,12 @@ BPF verifier は、ロード時に BPF プログラムがカーネル内で許�
 
 故障させると、次の順で復帰することを期待する。
 
-```text
-壊れた scheduler を system-wide で load
-    ↓
-enqueue で受け取った runnable task を放置する
-    ↓
-タスクが CPU を得られず、VM の応答が止まる
-    ↓
-watchdog が stall を検出
-    ↓
-sched_ext scheduler を abort
-    ↓
-タスクが fair class へ戻る
-    ↓
-loader が停止理由を表示
-```
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="watchdog が壊れた scheduler から復帰させる流れ（横スクロール可能）">
+<img src="../images/watchdog-recovery.svg" alt="上段はタスクが enqueue から DSQ へ進めず停滞する状態。カーネルの watchdog が停滞を検出して自作 scheduler を解除すると、下段のようにタスクが fair class で再び CPU を得る。">
+</div>
+<figcaption>× はタスクを DSQ へ渡す経路の欠落を示す。watchdog はカーネル側で停滞を検出する。</figcaption>
+</figure>
 
 最後の checkpoint は、`enqueue` されたタスクをどの DSQ にも入れない。
 実行可能なタスクは CPU を待ち続ける。

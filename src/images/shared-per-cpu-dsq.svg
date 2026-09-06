@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="330" viewBox="0 0 760 330" role="img" aria-labelledby="title desc">
+<title id="title">共有 DSQ と CPU ごとの DSQ</title><desc id="desc">左は一つの共有 DSQ に A、B、C が並び CPU 0 と CPU 1 へ分岐する。右は CPU ごとの独自 DSQ に A、C と B を分け、それぞれの CPU へ渡す。ローカル DSQ と callback は省略。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker></defs>
+<rect width="760" height="330" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+<text x="199" y="43" text-anchor="middle" font-size="22" fill="#172b3a">共有 DSQ</text>
+<text x="561" y="43" text-anchor="middle" font-size="22" fill="#172b3a">CPU ごとの DSQ</text>
+<path d="M 380 68 V 302" stroke="#d8e0e5"/>
+<rect x="72" y="90" width="254" height="76" rx="8" fill="#fff0d7" stroke="#a25c12"/>
+<rect x="410" y="90" width="140" height="76" rx="8" fill="#fff0d7" stroke="#a25c12"/>
+<rect x="572" y="90" width="140" height="76" rx="8" fill="#fff0d7" stroke="#a25c12"/>
+<rect x="102" y="107" width="54" height="42" rx="8" fill="#fff" stroke="#d4b381"/>
+<text x="129" y="135" text-anchor="middle" font-size="18" fill="#172b3a">A</text>
+<rect x="172" y="107" width="54" height="42" rx="8" fill="#fff" stroke="#d4b381"/>
+<text x="199" y="135" text-anchor="middle" font-size="18" fill="#172b3a">B</text>
+<rect x="242" y="107" width="54" height="42" rx="8" fill="#fff" stroke="#d4b381"/>
+<text x="269" y="135" text-anchor="middle" font-size="18" fill="#172b3a">C</text>
+<rect x="420" y="107" width="54" height="42" rx="8" fill="#fff" stroke="#d4b381"/>
+<text x="447" y="135" text-anchor="middle" font-size="18" fill="#172b3a">A</text>
+<rect x="486" y="107" width="54" height="42" rx="8" fill="#fff" stroke="#d4b381"/>
+<text x="513" y="135" text-anchor="middle" font-size="18" fill="#172b3a">C</text>
+<rect x="615" y="107" width="54" height="42" rx="8" fill="#fff" stroke="#d4b381"/>
+<text x="642" y="135" text-anchor="middle" font-size="18" fill="#172b3a">B</text>
+<path d="M 199 166 V 200 H 118 V 246" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 199 200 H 280 V 246" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 480 166 V 246" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 642 166 V 246" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="48" y="252" width="140" height="50" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="118" y="283" text-anchor="middle" font-size="18" fill="#172b3a">CPU 0</text>
+<rect x="210" y="252" width="140" height="50" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="280" y="283" text-anchor="middle" font-size="18" fill="#172b3a">CPU 1</text>
+<rect x="410" y="252" width="140" height="50" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="480" y="283" text-anchor="middle" font-size="18" fill="#172b3a">CPU 0</text>
+<rect x="572" y="252" width="140" height="50" rx="8" fill="#e3f5f0" stroke="#087f75"/>
+<text x="642" y="283" text-anchor="middle" font-size="18" fill="#172b3a">CPU 1</text>
+</g>
+</svg>
