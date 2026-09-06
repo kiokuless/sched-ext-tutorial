@@ -1,0 +1,42 @@
+測定日: 2026-09-06 (Asia/Tokyo)
+実装のリビジョン: 80c37d55c8886a932fa6f954e6be331129055242
+Host: Apple M5, macOS 26.6.2 (25G83)
+Multipass: 1.16.3+mac
+Guest: Ubuntu 26.04 arm64, 4 vCPU, 4 GiB RAM
+Kernel: 7.0.0-30-generic
+scx crates: 1.1.3
+clang: 19.1.7
+Rust: 1.95.0
+perf: 7.0.14
+CPU affinity: CPU 0 (hog A, hog B, periodic)
+Hogs: 2 processes, --seconds 20 each
+Periodic: --period-ms 1000 --samples 15 --tolerance-ms 100
+Mode: partial (fair condition has no BPF scheduler)
+各条件1回の参考記録。ホスト全体の負荷は固定していない。
+標本と集計はコマンド出力からそのまま抜粋。ビルドログは省略。
+context-switches は periodic 実行中の CPU 0 全体の総数。
+
+Command: make bench CASE=step STEP=03
+
+sample,late_ms,deadline_missed
+1,2462.364,true
+2,1462.380,true
+3,462.381,true
+4,3464.364,true
+5,2464.382,true
+6,1464.383,true
+7,464.384,true
+8,3466.370,true
+9,2466.382,true
+10,1466.382,true
+11,466.383,true
+12,3468.367,true
+13,2468.384,true
+14,1468.385,true
+15,468.385,true
+
+average_late_ms=1865.578
+max_late_ms=3468.367
+deadline_misses=15/15
+
+               177      context-switches

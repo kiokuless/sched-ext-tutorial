@@ -1,14 +1,8 @@
 # 最小のスケジューラを動かす
 
-差し替える場所と載せ方が分かったので、最初の scheduler を動かす。
 最初の scheduler は、実行可能になったタスクを組み込みのグローバル DSQ へ入れる。
 CPU ごとの優先度も、タスクごとの重みも持たない。
-まずこの最小構成をビルドし、ロードし、外すところまでを一周して、作業の形を掴む。
-
-この章の scheduler は、意図的に退屈なものにしている。
-最初から独自の待ち行列や優先度制御まで入れると、ロードに失敗したときに BPF 側の問題なのか、loader 側の問題なのか、スケジューリング方針の問題なのかを切り分けにくい。
-まず「自分の `sched_ext_ops` がカーネルに載り、タスクがその経路を通り、`Ctrl+C` で元に戻る」という最小の一周だけを確認する。
-以降の変更は、この動く基準点から一つずつ足していく。
+まずビルド、ロード、終了を確かめ、以降の変更で問題が起きたときに戻れる基準点を作る。
 
 ## checkpoint を作業領域へ戻す
 
@@ -18,7 +12,8 @@ make restore STEP=01
 
 参加者が読み、以降の章で編集していくファイルは `lab/src/bpf/main.bpf.c` である。
 各章の完成状態は `checkpoints/step-01-global/` に残してあり、`make restore` はそのコードを lab へ戻すコマンドである。
-以降の章でも、restore でその章の状態を再現できる。
+`make restore` は lab の BPF ファイルを上書きする。
+以降は前章のコードを編集して進め、詰まったときに完成状態と比較する。
 
 ## callback を読む
 
@@ -37,7 +32,6 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 
 `scx_bpf_select_cpu_dfl()` は、前回動いていた CPU（`prev_cpu`）を起点に、idle な CPU を優先して選ぶ組み込み処理である。
 `is_idle` は「idle CPU を見つけられたか」を受け取る出力引数で、この章では使っていない。
-使うのは次章である。
 
 続く `enqueue` は、実行可能になったタスクを `SCX_DSQ_GLOBAL` へ入れる。
 
@@ -59,8 +53,8 @@ const volatile u64 slice_ns = 20000000ULL;  /* 20 ms, kernel default */
 
 `const volatile` は、BPF プログラムの設定値を loader から与えるときによく使われる書き方である。
 ここでは C の修飾子そのものを深掘りする必要はなく、「BPF 側からは読み取り専用の設定値として使い、loader がロード前に値を差し替えられる」と理解すればよい。
-実際の値は、前章の流れで述べた rodata 経由で loader から設定される。
-この値を書き換える実験が、後の二つの章である。
+通常は BPF ファイルに書いた初期値を使う。
+loader に `--slice-us` を指定した場合だけ、rodata の値を上書きする。
 
 ファイルの末尾では、実装した callback を `SCX_OPS_DEFINE` がひとつの ops 構造体にまとめ、名前と timeout を設定する。
 `exit` は scheduler が外されるときに停止理由を記録する小さな callback で、今は読み飛ばしてよい。

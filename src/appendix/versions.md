@@ -16,6 +16,6 @@
 | mdBook | 0.5.4 |
 
 `sched_ext` の BPF API には安定性保証がない。
-教材を新しい Ubuntu イメージやカーネルへ更新する場合は、本文だけでなく、全 checkpoint のビルド、ロード、15秒実験、watchdog 復帰までを一緒に検証する。
+教材を新しい Ubuntu イメージやカーネルへ更新する場合は、本文だけでなく、全 checkpoint のビルド、ロード、15 標本の実験、watchdog 復帰までを一緒に検証する。
 
 VM の `/etc/sched-ext-tutorial/versions` には、プロビジョニング時に解決された実際のパッケージ版を記録する。
