@@ -13,7 +13,7 @@ bootstrap が完了していない状態では、検査対象のツールが揃�
 
 まず `make restore STEP=01` と `make build STEP=lab` が成功するか確認する。
 最小構成が通るなら、環境ではなく直前に変更した BPF コードに問題がある。
-成功するなら、直前に変更した BPF コードが verifier の制約に反している可能性がある。
+そのコードが verifier の制約に反していないか、直前の変更から確認する。
 
 `make run STEP=lab MODE=partial` に `-v` を渡したい場合は、VM 内で次を実行する。
 

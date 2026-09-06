@@ -8,7 +8,7 @@ VM を使う理由は再現性のほかに安全があるが、その詳細は�
 ## Multipass をインストールする
 
 macOS では Homebrew から Multipass を導入できる。
-Multipass はコマンド一つで Ubuntu VM を作成・操作できるツールで、この本では VM の作成とシェル接続に使う。
+Multipass はコマンド一つで Ubuntu VM を作成し、操作できるツールで、この本では VM の作成とシェル接続に使う。
 
 ```console
 brew install --cask multipass

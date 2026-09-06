@@ -24,6 +24,7 @@
 
 # 付録
 
+- [用語集](./appendix/glossary.md)
 - [トラブルシューティング](./appendix/troubleshooting.md)
 - [固定したバージョン](./appendix/versions.md)
 - [ライセンスと由来](./appendix/licenses.md)

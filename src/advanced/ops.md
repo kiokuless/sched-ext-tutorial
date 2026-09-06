@@ -21,4 +21,4 @@
 共有 DSQ の作成に使った `init` と、停止理由を記録した `exit` は、scheduler 全体の寿命に対応する callback である。
 一方、`init_task` と `exit_task` はタスクごとの寿命に対応し、粒度が違う。
 
-各 callback の正確なシグネチャは、[Linux 7.0 の sched_ext 文書](https://docs.kernel.org/7.0/scheduler/sched-ext.html)と、ビルド時に使用する scx v1.1.3 の `compat.bpf.h` を参照する。
+各 callback の正確なシグネチャは、Linux 7.0 の `sched_ext` 文書と、ビルド時に使用する scx v1.1.3 の `compat.bpf.h` を参照する。
