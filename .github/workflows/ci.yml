@@ -40,4 +40,5 @@ jobs:
         run: |
           for manifest in lab/Cargo.toml checkpoints/*/Cargo.toml; do
             CARGO_TARGET_DIR=target/ci-schedulers cargo build --release --manifest-path "$manifest"
+            CARGO_TARGET_DIR=target/ci-schedulers cargo clean --release --package scx_oreore --manifest-path "$manifest"
           done
