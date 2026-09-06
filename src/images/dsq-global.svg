@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="570" viewBox="0 0 760 570" role="img" aria-labelledby="title desc">
+<title id="title">グローバル DSQ から CPU へ</title>
+<desc id="desc">step 01 の経路。起床したタスクは select_cpu を経て enqueue に入り、グローバル DSQ に置かれる。カーネルが CPU ごとのローカル DSQ へ移し、CPU が実行する。CPU 0 と CPU 1 は候補例であり、select_cpu の戻り値は最終配置の保証ではない。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>
+  <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087f75"/></marker>
+</defs>
+<rect width="760" height="570" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">グローバル DSQ から CPU へ</text>
+<text x="28" y="67" font-size="16" fill="#526575" text-anchor="start" font-weight="400">STEP 01   /   タスクの受け渡しを上から下へ追う</text>
+<rect x="270" y="90" width="220" height="48" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="380.0" y="120.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">起床したタスク</text>
+<path d="M 380 138 V 158" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="270" y="160" width="220" height="65" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="380.0" y="188" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">select_cpu</text>
+<text x="380.0" y="211" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">CPU の候補を返す</text>
+<path d="M 380 225 V 247" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="270" y="250" width="220" height="48" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="380.0" y="280.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">enqueue</text>
+<path d="M 380 298 V 322" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="255" y="325" width="250" height="65" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="380.0" y="353" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">グローバル DSQ</text>
+<text x="380.0" y="376" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">SCX_DSQ_GLOBAL</text>
+<text x="520" y="280" font-size="16" fill="#1761a0" text-anchor="start" font-weight="400">BPF が投入</text>
+<text x="520" y="351" font-size="16" fill="#526575" text-anchor="start" font-weight="400">カーネルが用意</text>
+<path d="M 380 390 V 415 H 178 V 439" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 380 415 H 582 V 439" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="380" y="433" font-size="16" fill="#526575" text-anchor="middle" font-weight="400">カーネルが移す</text>
+<rect x="66" y="442" width="224" height="48" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="178.0" y="472.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">CPU 0 のローカル DSQ</text>
+<rect x="470" y="442" width="224" height="48" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="582.0" y="472.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">CPU 1 のローカル DSQ</text>
+<path d="M 178 490 V 508" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 582 490 V 508" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="108" y="511" width="140" height="38" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+<text x="178.0" y="536.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">CPU 0</text>
+<rect x="512" y="511" width="140" height="38" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+<text x="582.0" y="536.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">CPU 1</text>
+</g>
+</svg>

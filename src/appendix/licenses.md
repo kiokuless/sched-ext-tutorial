@@ -1,6 +1,6 @@
 # ライセンスと由来
 
-本文は Creative Commons Attribution 4.0 International（CC BY 4.0）で提供する。
+本文と `src/images/` の図版は Creative Commons Attribution 4.0 International（CC BY 4.0）で提供する。
 独自に作成した負荷生成器、VM 操作スクリプト、検査スクリプトは MIT OR Apache-2.0で提供する。
 
 教材の BPF scheduler は、Linux 6.18 の `tools/sched_ext/scx_simple.bpf.c` を基にしている。

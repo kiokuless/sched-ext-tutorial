@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="340" viewBox="0 0 760 340" role="img" aria-labelledby="title desc">
+<title id="title">periodic が待つのは、先行する最大 2 スライス</title>
+<desc id="desc">2 秒スライスの単一 CPU FIFO の模式図。periodic が runnable になった直後、hog A の残りスライスが約 2 秒あり、次に hog B が 2 秒実行する。periodic はその後で実行され、待ちは最大約 4 秒となる。割り込みなどを除いたモデルであり、late_ms の上限ではない。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>
+  <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087f75"/></marker>
+</defs>
+<rect width="760" height="340" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">periodic が待つのは、先行する最大 2 スライス</text>
+<text x="28" y="67" font-size="16" fill="#526575" text-anchor="start" font-weight="400">模式図   /   periodic が runnable になった瞬間を t = 0 とする</text>
+<path d="M 80 109 V 238" fill="none" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="80" y="103" font-size="17" fill="#526575" text-anchor="middle" font-weight="400">0</text>
+<path d="M 360 109 V 238" fill="none" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="360" y="103" font-size="17" fill="#526575" text-anchor="middle" font-weight="400">2</text>
+<path d="M 640 109 V 238" fill="none" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="640" y="103" font-size="17" fill="#526575" text-anchor="middle" font-weight="400">4</text>
+<text x="698" y="103" font-size="17" fill="#526575" text-anchor="start" font-weight="400">秒</text>
+<rect x="80" y="122" width="280" height="58" rx="3" fill="#e7f1fc" stroke="#1761a0"/>
+<rect x="360" y="122" width="280" height="58" rx="3" fill="#fff0d7" stroke="#a25c12"/>
+<rect x="640" y="122" width="60" height="58" rx="3" fill="#e3f5f0" stroke="#087f75"/>
+<text x="220" y="146" font-size="19" fill="#1761a0" text-anchor="middle" font-weight="600">hog A</text>
+<text x="220" y="169" font-size="17" fill="#1761a0" text-anchor="middle" font-weight="400">残り最大約 2 秒</text>
+<text x="500" y="146" font-size="19" fill="#a25c12" text-anchor="middle" font-weight="600">hog B</text>
+<text x="500" y="169" font-size="17" fill="#a25c12" text-anchor="middle" font-weight="400">1 スライス 2 秒</text>
+<text x="670" y="157" font-size="20" fill="#087f75" text-anchor="middle" font-weight="700">P</text>
+<path d="M 80 201 V 217 H 640 V 201" fill="none" stroke="#087f75" stroke-width="3"/>
+<text x="360" y="250" font-size="20" fill="#087f75" text-anchor="middle" font-weight="600">periodic（P）の待ち：最大約 4 秒</text>
+<text x="28" y="294" font-size="16" fill="#526575" text-anchor="start" font-weight="400">スライスを使い切った A は、待っている periodic の後ろへ並び直す。</text>
+<text x="28" y="318" font-size="16" fill="#526575" text-anchor="start" font-weight="400">割り込み、他クラスの実行、ホスト側での VM 停止時間は含めない。</text>
+</g>
+</svg>

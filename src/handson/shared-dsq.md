@@ -108,6 +108,19 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 この場合は `enqueue` が省略されるので、同じタスクが共有 DSQ にも入ることはない。
 空いている CPU が見つからなければ、先ほど作った `enqueue` と `dispatch` の経路を通る。
 
+グローバル DSQ の経路と比べると、共有 DSQ から取り出す `dispatch` と、左側の直接投入が加わっている。
+緑の経路を通ったタスクが `enqueue` を省略することを、矢印で確かめる。
+
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="図2：共有 DSQ と idle CPU への直接投入（横スクロール可能）">
+<img src="../images/dsq-shared.svg" alt="idle CPU が見つかれば select_cpu からローカル DSQ へ直接投入する。見つからなければ enqueue、共有 DSQ、dispatch を経てローカル DSQ へ移す。">
+</div>
+<figcaption>図2：共有 DSQ と idle CPU への直接投入。狭い画面では図を横にスクロールできる。</figcaption>
+</figure>
+
+図の CPU 0 は受け取り先の一例である。
+共有 DSQ を使う場合は `dispatch` を呼び出した CPU、直接投入する場合は `select_cpu` が返した CPU に渡る。
+
 もう一度ビルドとロードを確認し、終了してから、タスクを実際に流してみる。
 次のコマンドは scheduler のロードから負荷生成器の起動、停止までを行う。
 

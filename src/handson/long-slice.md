@@ -82,6 +82,16 @@ periodic の `late_ms` は、**予定時刻から処理を再開するまでの�
 - **runnable になった時刻**：眠っていたタスクが実行可能になった時刻
 - **処理を再開した時刻**：負荷生成器が `sleep` から戻って時刻を読んだ時点
 
+眠っているタスクが起きる場面を時間軸に置くと、`late_ms` が複数の区間にまたがることが分かる。
+青い括弧が測定範囲である。
+
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="図3：予定時刻から処理再開までの測定区間（横スクロール可能）">
+<img src="../images/latency-intervals.svg" alt="予定時刻から runnable になるまでの遅れと、その後の CPU 待ちなどを合わせた区間が late_ms。runnable の時刻自体は負荷生成器では測定していない。">
+</div>
+<figcaption>図3：予定時刻から処理再開までの測定区間。狭い画面では図を横にスクロールできる。</figcaption>
+</figure>
+
 負荷生成器は予定時刻と処理再開時刻を記録するが、runnable になった時刻は取得していない。
 そのため `late_ms` には、runnable になるまでの遅れと、CPU を待つ時間などが含まれる。
 VM 自体がホスト側で実行を待たされる影響も混ざる。
@@ -138,14 +148,12 @@ deadline_misses=15/15
 実行中の hog A の残りスライスと、すでにキューで待っている hog B のスライスを、最大 2 回分待つためである。
 スライスを使い切った hog A は末尾へ並び直すので、そのときすでに待っている periodic を追い越さない。
 
-```text
-t=0                    t=2                    t=4
- |----------------------|----------------------|
- hog A:  残りスライスを実行
-                         hog B: 1スライス実行
- periodic: runnable ---------------------------------> 実行
-           <------------- 最大約4秒の待ち ----------->
-```
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="図4：二つの hog が先行する FIFO の待ち時間（横スクロール可能）">
+<img src="../images/fifo-wait.svg" alt="periodic は実行中の hog A の残りスライスと、先に並んだ hog B のスライスを待つ。各スライスが 2 秒なら最大約 4 秒。">
+</div>
+<figcaption>図4：二つの hog が先行する FIFO の待ち時間。狭い画面では図を横にスクロールできる。</figcaption>
+</figure>
 
 この図は実測ログではなく、runnable になった瞬間を原点にしたモデルである。
 2 秒のスライスを使い切る直前に periodic が起きれば、最初の待ちは短くなる。

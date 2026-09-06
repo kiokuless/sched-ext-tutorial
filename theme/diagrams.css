@@ -1,0 +1,43 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* Preserve diagram labels on narrow screens; scroll within the figure. */
+.technical-figure {
+    margin: 1.5em 0;
+}
+
+.technical-figure .diagram-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--table-border-color);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.technical-figure img {
+    display: block;
+    width: 100%;
+    min-width: 680px;
+    max-width: none;
+}
+
+.technical-figure .diagram-scroll:focus-visible {
+    outline: 3px solid var(--links);
+    outline-offset: 3px;
+}
+
+.technical-figure figcaption {
+    margin-top: 0.65em;
+    font-size: 0.9em;
+}
+
+@media print {
+    .technical-figure {
+        break-inside: avoid;
+    }
+
+    .technical-figure .diagram-scroll {
+        overflow: visible;
+    }
+
+    .technical-figure img {
+        min-width: 0;
+    }
+}

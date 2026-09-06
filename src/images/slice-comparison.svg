@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="584" viewBox="0 0 760 584" role="img" aria-labelledby="title desc">
+<title id="title">同じ 60 ms を、二つのスライスで比べる</title>
+<desc id="desc">単一 CPU の FIFO の模式図。0 ms に hog A がスライスを開始し hog B が待つ。periodic は 5 ms に runnable になる。2 秒スライスなら表示した 60 ms 全体で A が走り続ける。10 ms スライスなら A の後に B が走り、20 ms に periodic が実行される。periodic の実行時間は説明用に 2 ms と仮定。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>
+  <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087f75"/></marker>
+</defs>
+<rect width="760" height="584" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">同じ 60 ms を、二つのスライスで比べる</text>
+<text x="28" y="68" font-size="16" fill="#526575" text-anchor="start" font-weight="400">模式図   /   CPU 0、hog A、hog B、periodic の 3 タスク</text>
+<text x="28" y="95" font-size="16" fill="#526575" text-anchor="start" font-weight="400">開始時：A がスライス開始、B は待ち行列。periodic は 5 ms に起床。</text>
+<path d="M 90 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="90" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">0</text>
+<path d="M 190 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="190" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">10</text>
+<path d="M 290 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="290" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">20</text>
+<path d="M 390 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="390" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">30</text>
+<path d="M 490 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="490" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">40</text>
+<path d="M 590 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="590" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">50</text>
+<path d="M 690 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
+<text x="690" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">60</text>
+<text x="720" y="126" font-size="15" fill="#526575" text-anchor="start" font-weight="400">ms</text>
+<text x="30" y="162" font-size="19" fill="#172b3a" text-anchor="start" font-weight="700">2 秒スライス</text>
+<rect x="90" y="177" width="600" height="46" rx="4" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="390" y="207" font-size="19" fill="#1761a0" text-anchor="middle" font-weight="600">hog A が実行を続ける</text>
+<path d="M 690 200 H 723" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 140 228 V 246 H 705" fill="none" stroke="#a25c12" stroke-width="3"/>
+<text x="413" y="273" font-size="17" fill="#a25c12" text-anchor="middle" font-weight="400">periodic は待機中（実行はこの表示範囲より後）</text>
+<text x="30" y="320" font-size="19" fill="#172b3a" text-anchor="start" font-weight="700">10 ms スライス</text>
+<rect x="90" y="337" width="100" height="46" rx="2" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="140.0" y="367" font-size="19" fill="#1761a0" text-anchor="middle" font-weight="600">A</text>
+<rect x="190" y="337" width="100" height="46" rx="2" fill="#fff0d7" stroke="#a25c12"/>
+<text x="240.0" y="367" font-size="19" fill="#a25c12" text-anchor="middle" font-weight="600">B</text>
+<rect x="290" y="337" width="20" height="46" rx="2" fill="#e3f5f0" stroke="#087f75"/>
+<rect x="310" y="337" width="100" height="46" rx="2" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="360.0" y="367" font-size="19" fill="#1761a0" text-anchor="middle" font-weight="600">A</text>
+<rect x="410" y="337" width="100" height="46" rx="2" fill="#fff0d7" stroke="#a25c12"/>
+<text x="460.0" y="367" font-size="19" fill="#a25c12" text-anchor="middle" font-weight="600">B</text>
+<rect x="510" y="337" width="100" height="46" rx="2" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="560.0" y="367" font-size="19" fill="#1761a0" text-anchor="middle" font-weight="600">A</text>
+<rect x="610" y="337" width="80" height="46" rx="2" fill="#fff0d7" stroke="#a25c12"/>
+<text x="650.0" y="367" font-size="19" fill="#a25c12" text-anchor="middle" font-weight="600">B</text>
+<path d="M 140 388 V 406 H 290 V 388" fill="none" stroke="#087f75" stroke-width="3"/>
+<text x="215" y="435" font-size="17" fill="#087f75" text-anchor="middle" font-weight="600">待ち 15 ms</text>
+<path d="M 300 385 V 451 H 379" fill="none" stroke="#087f75" stroke-width="2"/>
+<text x="386" y="458" font-size="17" fill="#087f75" text-anchor="start" font-weight="400">periodic を実行（20〜22 ms）</text>
+<path d="M 140 171 V 225" fill="none" stroke="#087f75" stroke-width="2" stroke-dasharray="6 5"/>
+<path d="M 140 328 V 335" fill="none" stroke="#087f75" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="140" y="485" font-size="16" fill="#087f75" text-anchor="start" font-weight="400">5 ms：periodic が runnable に</text>
+<rect x="28" y="508" width="704" height="58" rx="9" fill="#eef2f5" stroke="none"/>
+<text x="46" y="532" font-size="16" fill="#526575" text-anchor="start" font-weight="400">色と文字：青 A、黄 B、緑 periodic。各タスクの実行順を示す。</text>
+<text x="46" y="554" font-size="16" fill="#526575" text-anchor="start" font-weight="400">割り込みと切り替え時間は省略。periodic の実行を 2 ms と仮定。</text>
+</g>
+</svg>

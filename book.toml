@@ -9,5 +9,7 @@ build-dir = "book"
 create-missing = false
 
 [output.html]
+additional-css = ["theme/diagrams.css"]
+additional-js = ["theme/diagrams.js"]
 git-repository-url = "https://github.com/kiokuless/sched-ext-tutorial"
 edit-url-template = "https://github.com/kiokuless/sched-ext-tutorial/edit/main/{path}"

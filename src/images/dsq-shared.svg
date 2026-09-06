@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="680" viewBox="0 0 760 680" role="img" aria-labelledby="title desc">
+<title id="title">共有 DSQ を通る経路と直接投入</title>
+<desc id="desc">step 02 の経路。select_cpu が idle CPU を見つけた場合は、戻り値の CPU のローカル DSQ に直接投入して enqueue を省略する。見つからなければ enqueue が共有 DSQ に入れ、仕事を求めた CPU の dispatch がローカル DSQ に移す。図の CPU 0 は選ばれた CPU の例。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>
+  <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087f75"/></marker>
+</defs>
+<rect width="760" height="680" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">共有 DSQ を通る経路と直接投入</text>
+<text x="28" y="67" font-size="16" fill="#526575" text-anchor="start" font-weight="400">STEP 02   /   ローカル DSQ への二つの経路</text>
+<rect x="255" y="90" width="250" height="48" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="380.0" y="120.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">起床したタスク</text>
+<path d="M 380 138 V 158" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="255" y="160" width="250" height="65" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="380.0" y="188" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">select_cpu</text>
+<text x="380.0" y="211" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">idle CPU を見つけたか</text>
+<path d="M 380 225 V 248" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="398" y="246" font-size="16" fill="#526575" text-anchor="start" font-weight="400">いいえ</text>
+<rect x="270" y="253" width="220" height="48" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="380.0" y="283.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">enqueue</text>
+<path d="M 380 301 V 325" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="255" y="328" width="250" height="65" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="380.0" y="356" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">共有 DSQ</text>
+<text x="380.0" y="379" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">SHARED_DSQ = 0</text>
+<text x="518" y="355" font-size="16" fill="#1761a0" text-anchor="start" font-weight="400">init で作成</text>
+<path d="M 380 393 V 420" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="255" y="423" width="250" height="65" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="380.0" y="451" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">dispatch</text>
+<text x="380.0" y="474" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">共有 DSQ から一つ移す</text>
+<text x="518" y="451" font-size="16" fill="#526575" text-anchor="start" font-weight="400">CPU が仕事を求める</text>
+<path d="M 380 488 V 520" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="255" y="523" width="250" height="48" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+<text x="380.0" y="553.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">CPU 0 のローカル DSQ</text>
+<path d="M 380 571 V 595" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="310" y="598" width="140" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+<text x="380.0" y="625.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">CPU 0</text>
+<path d="M 255 192 H 110 V 547 H 250" fill="none" stroke="#087f75" stroke-width="2" marker-end="url(#teal-arrow)"/>
+<rect x="30" y="297" width="190" height="116" rx="9" fill="#fff" stroke="none"/>
+<text x="125" y="323" font-size="18" fill="#087f75" text-anchor="middle" font-weight="700">はい</text>
+<text x="125" y="350" font-size="18" fill="#087f75" text-anchor="middle" font-weight="400">直接投入</text>
+<text x="125" y="378" font-size="16" fill="#087f75" text-anchor="middle" font-weight="400">enqueue を省略</text>
+<text x="380" y="665" font-size="16" fill="#526575" text-anchor="middle" font-weight="400">CPU 0 は受け渡し先の例。固定先を表すものではない。</text>
+</g>
+</svg>

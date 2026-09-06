@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="440" viewBox="0 0 760 440" role="img" aria-labelledby="title desc">
+<title id="title">late_ms が測る区間</title>
+<desc id="desc">眠っているタスクについて予定時刻、runnable になった時刻、処理再開時刻を区別する模式図。late_ms は予定時刻から処理再開までを含む。runnable になるまでの遅れと、その後の実行待ちなどをこの値だけでは分離できない。間隔は縮尺どおりではない。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>
+  <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087f75"/></marker>
+</defs>
+<rect width="760" height="440" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+
+<text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">late_ms が測る区間</text>
+<text x="28" y="68" font-size="16" fill="#526575" text-anchor="start" font-weight="400">模式図   /   眠っているタスクが再び実行される場合</text>
+<path d="M 90 139 V 348" fill="none" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<path d="M 338 139 V 348" fill="none" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<path d="M 670 139 V 348" fill="none" stroke="#a9bbc6" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="90" y="112" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">予定時刻</text>
+<text x="338" y="107" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">runnable に</text>
+<text x="338" y="129" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">なった時刻</text>
+<text x="670" y="112" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">処理再開</text>
+<rect x="40" y="160" width="298" height="58" rx="9" fill="#eef2f5" stroke="none"/>
+<rect x="338" y="160" width="332" height="58" rx="9" fill="#fff0d7" stroke="none"/>
+<rect x="670" y="160" width="62" height="58" rx="9" fill="#e3f5f0" stroke="none"/>
+<text x="189" y="196" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="400">睡眠中</text>
+<text x="504" y="196" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="400">実行可能だが CPU 待ち</text>
+<text x="701" y="196" font-size="17" fill="#172b3a" text-anchor="middle" font-weight="400">実行</text>
+<path d="M 40 231 H 734" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="732" y="253" font-size="15" fill="#526575" text-anchor="end" font-weight="400">時間</text>
+<path d="M 90 275 V 286 H 338 V 275" fill="none" stroke="#526575" stroke-width="2"/>
+<text x="214" y="315" font-size="16" fill="#526575" text-anchor="middle" font-weight="400">runnable になるまでの遅れ</text>
+<path d="M 338 275 V 286 H 670 V 275" fill="none" stroke="#526575" stroke-width="2"/>
+<text x="504" y="315" font-size="16" fill="#526575" text-anchor="middle" font-weight="400">CPU 待ちと時刻取得までの時間</text>
+<path d="M 90 336 V 350 H 670 V 336" fill="none" stroke="#1761a0" stroke-width="3"/>
+<text x="380" y="381" font-size="21" fill="#1761a0" text-anchor="middle" font-weight="600">late_ms = 処理再開時刻 − 予定時刻</text>
+<text x="380" y="417" font-size="16" fill="#526575" text-anchor="middle" font-weight="400">runnable の時刻は未計測。図の区間の長さは実測値ではない。</text>
+</g>
+</svg>

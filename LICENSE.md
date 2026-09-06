@@ -2,7 +2,7 @@
 
 This repository contains material under more than one license.
 
-- The Japanese tutorial text under `src/` is licensed under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
+- The Japanese tutorial text and diagrams under `src/` are licensed under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
 - Original utilities and scripts are licensed under either the MIT License or the Apache License, Version 2.0, at your option.
 - The scheduler implementations under `lab/` and `checkpoints/` are derived from Linux kernel samples and are licensed under GPL-2.0-only.
 

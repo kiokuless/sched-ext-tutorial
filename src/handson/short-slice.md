@@ -67,6 +67,21 @@ make bench CASE=step STEP=lab 2>&1 | tee target/measurements/short.log
 前章のモデルで最大 2 スライス分だった待ちは、10 ミリ秒なら約 20 ミリ秒になる。
 この値も runnable 後の待ちを単純化したモデルであり、`late_ms` の上限ではない。
 
+同じ 60 ミリ秒を上下に並べると、CPU を渡す機会の違いが見える。
+両方とも hog A がスライスを開始した直後から描き、hog B はすでに待ち、periodic は 5 ミリ秒で runnable になると仮定する。
+
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="図5：同じ時間幅で見る長いスライスと短いスライス（横スクロール可能）">
+<img src="../images/slice-comparison.svg" alt="同じ 60 ミリ秒で、2 秒スライスでは hog A が走り続け periodic は待つ。10 ミリ秒なら hog A、hog B の後、20 ミリ秒に periodic が実行される。">
+</div>
+<figcaption>図5：同じ時間幅で見る長いスライスと短いスライス。狭い画面では図を横にスクロールできる。</figcaption>
+</figure>
+
+2 秒スライスの行は、hog A の実行途中で表示範囲が終わっている。
+10 ミリ秒の行では、periodic は 15 ミリ秒待って CPU を得る。
+periodic の実行時間を説明用に 2 ミリ秒と置き、割り込みと切り替え時間は省略した模式図である。
+実測値の表とは区別して読む。
+
 実測の遅延が減り、切り替え回数が増えていれば、この説明と整合する。
 逆の結果やほとんど差がない結果なら、まず [CPU 固定、タスク数、適用中のスケジューラ](../appendix/troubleshooting.md#実験で遅延が見えない)を確認する。
 測定が hog の終了後まで延びていないか、ログ末尾だけ遅れが小さくなっていないかも見る。

@@ -29,17 +29,19 @@ CPU の割り当てを決める scheduler は、そのとき少なくとも次�
 各 CPU は自分のローカル DSQ からタスクを実行し、空なら組み込みのグローバル DSQ も参照する。
 独自 DSQ を作った場合は、`dispatch` がそこからローカル DSQ へタスクを移す。
 
-```text
-runnable
-   |
-   v
-enqueue() -> DSQ -> dispatch() -> local DSQ -> CPU
-     ^                                           |
-     |-------------- slice expires -------------|
-```
+最初のスケジューラでは、次の経路を使う。
+BPF が担当するのは青い callback であり、グローバル DSQ からローカル DSQ への移動はカーネルに任せる。
 
-図の `dispatch` は、独自の DSQ を作った場合に必要になる経路である。
-組み込みのグローバル DSQ からはカーネルがローカル DSQ へ移すため、最初に動かす scheduler では `dispatch` を実装しない。
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="図1：グローバル DSQ を使う最小構成（横スクロール可能）">
+<img src="../images/dsq-global.svg" alt="起床タスクは select_cpu、enqueue、グローバル DSQ の順に進む。カーネルが CPU ごとのローカル DSQ へ移し、CPU が実行する。">
+</div>
+<figcaption>図1：グローバル DSQ を使う最小構成。狭い画面では図を横にスクロールできる。</figcaption>
+</figure>
+
+CPU 0 と CPU 1 は、受け取り先の候補を例示している。
+一つのタスクを両方へ複製する図ではない。
+この構成では `dispatch` を実装せず、独自 DSQ を作る段階でその役割を追加する。
 
 ## 本編で使う三種類の DSQ
 
