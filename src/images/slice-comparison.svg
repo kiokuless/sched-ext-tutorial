@@ -11,7 +11,7 @@
 
 <text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">同じ 60 ms を、二つのスライスで比べる</text>
 <text x="28" y="68" font-size="16" fill="#526575" text-anchor="start" font-weight="400">模式図   /   CPU 0、hog A、hog B、periodic の 3 タスク</text>
-<text x="28" y="95" font-size="16" fill="#526575" text-anchor="start" font-weight="400">開始時：A がスライス開始、B は待ち行列。periodic は 5 ms に起床。</text>
+<text x="28" y="95" font-size="16" fill="#526575" text-anchor="start" font-weight="400">開始時：A がスライス開始、B は待ち行列。periodic は 5 ms に wakeup。</text>
 <path d="M 90 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>
 <text x="90" y="126" font-size="15" fill="#526575" text-anchor="middle" font-weight="400">0</text>
 <path d="M 190 132 V 483" fill="none" stroke="#a9bbc6" stroke-width="1" stroke-dasharray="6 5"/>

@@ -12,7 +12,7 @@
 <text x="28" y="38" font-size="23" fill="#172b3a" text-anchor="start" font-weight="700">共有 DSQ を通る経路と直接投入</text>
 <text x="28" y="67" font-size="16" fill="#526575" text-anchor="start" font-weight="400">STEP 02   /   ローカル DSQ への二つの経路</text>
 <rect x="255" y="90" width="250" height="48" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
-<text x="380.0" y="120.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">起床したタスク</text>
+<text x="380.0" y="120.0" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">wakeup したタスク</text>
 <path d="M 380 138 V 158" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
 <rect x="255" y="160" width="250" height="65" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
 <text x="380.0" y="188" font-size="18" fill="#172b3a" text-anchor="middle" font-weight="600">select_cpu</text>

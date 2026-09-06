@@ -17,7 +17,7 @@ make restore STEP=01
 
 ## callback を読む
 
-`select_cpu` は、起床したタスクを動かす CPU の候補を選ぶ入口である。
+`select_cpu` は、待ち状態から実行可能になったタスクについて、動かす CPU の候補を選ぶ callback である。
 この実装は、判断を組み込みの CPU 選択処理へ委ねている。
 
 ```c
@@ -33,7 +33,7 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 `scx_bpf_select_cpu_dfl()` は、前回動いていた CPU（`prev_cpu`）を起点に、idle な CPU を優先して選ぶ組み込み処理である。
 `is_idle` は「idle CPU を見つけられたか」を受け取る出力引数で、この章では使っていない。
 
-続く `enqueue` は、実行可能になったタスクを `SCX_DSQ_GLOBAL` へ入れる。
+続く `enqueue` は、スケジューラへ渡された実行可能なタスクを `SCX_DSQ_GLOBAL` へ入れる。
 
 ```c
 void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)

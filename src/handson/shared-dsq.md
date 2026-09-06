@@ -86,7 +86,7 @@ make run STEP=lab MODE=partial
 ## 空いている CPU へ直接渡す
 
 共有 DSQ を経由する経路ができた。
-ただ、起床時に空いている CPU が見つかるなら、いったん共有 DSQ へ入れる必要はない。
+ただ、wakeup 時に空いている CPU が見つかるなら、いったん共有 DSQ へ入れる必要はない。
 `select_cpu` を次の内容に置き換える。
 
 ```c

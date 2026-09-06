@@ -10,7 +10,7 @@ CPU の割り当てを決める scheduler は、そのとき少なくとも次�
 - **どれだけ動かすか**：一度 CPU を得たタスクに、どれだけ連続して実行させるか
 
 この四つは独立しているように見えるが、実際には互いに影響する。
-たとえば、同じタスクを長く動かせば切り替え回数は減るが、その間に起きた別のタスクは待つことになる。
+たとえば、同じタスクを長く動かせば切り替え回数は減るが、その間に実行可能になった別のタスクは待つことになる。
 逆に、頻繁に選び直せば待ち時間を短くできる一方、切り替えの回数は増える。
 
 `sched_ext` では、カーネルがタスクを扱う判断点で BPF プログラムを呼び出す。
@@ -18,8 +18,8 @@ CPU の割り当てを決める scheduler は、そのとき少なくとも次�
 
 今回使う callback は三つである。
 
-- **`select_cpu`**：起床したタスクを動かす CPU の候補を選ぶ
-- **`enqueue`**：実行可能なタスクを待ち行列へ入れる
+- **`select_cpu`**：待ち状態から実行可能になったタスクについて、動かす CPU の候補を選ぶ
+- **`enqueue`**：スケジューラへ渡された実行可能なタスクを待ち行列へ入れる
 - **`dispatch`**：待ち行列からタスクを CPU のローカルキューへ移す
 
 三つの callback は、CPU の候補選択、タスクの保管、CPU への受け渡しを分担する。
@@ -34,7 +34,7 @@ BPF が担当するのは青い callback であり、グローバル DSQ から�
 
 <figure class="technical-figure">
 <div class="diagram-scroll" tabindex="0" role="region" aria-label="図1：グローバル DSQ を使う最小構成（横スクロール可能）">
-<img src="../images/dsq-global.svg" alt="起床タスクは select_cpu、enqueue、グローバル DSQ の順に進む。カーネルが CPU ごとのローカル DSQ へ移し、CPU が実行する。">
+<img src="../images/dsq-global.svg" alt="wakeup したタスクは select_cpu、enqueue、グローバル DSQ の順に進む。カーネルが CPU ごとのローカル DSQ へ移し、CPU が実行する。">
 </div>
 <figcaption>図1：グローバル DSQ を使う最小構成。狭い画面では図を横にスクロールできる。</figcaption>
 </figure>
