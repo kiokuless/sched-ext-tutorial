@@ -33,8 +33,9 @@ jobs:
       - name: Install BPF build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --yes clang-19 libbpf-dev libelf-dev pkg-config
-          sudo apt-get install --yes "linux-tools-$(uname -r)"
+          sudo apt-get install --yes clang-19 libbpf-dev libelf-dev linux-tools-generic pkg-config
+          bpftool_path=$(find /usr/lib/linux-tools -type f -name bpftool -print -quit)
+          sudo ln -sfn "$bpftool_path" /usr/local/bin/bpftool
           bpftool version
       - name: Build every scheduler checkpoint
         env:
