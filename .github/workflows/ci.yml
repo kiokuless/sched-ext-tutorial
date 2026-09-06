@@ -13,7 +13,7 @@ jobs:
   host-checks:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.95.0
@@ -22,11 +22,19 @@ jobs:
         run: cargo install mdbook --version 0.5.4 --locked
       - name: Check the book and host tools
         run: make check
+      - name: Configure GitHub Pages
+        if: github.event_name == 'push'
+        uses: actions/configure-pages@v5
+      - name: Upload GitHub Pages artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: book
 
   scheduler-builds:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.95.0
@@ -42,3 +50,23 @@ jobs:
             CARGO_TARGET_DIR=target/ci-schedulers cargo build --release --manifest-path "$manifest"
             CARGO_TARGET_DIR=target/ci-schedulers cargo clean --release --package scx_oreore --manifest-path "$manifest"
           done
+
+  deploy-pages:
+    if: github.event_name == 'push'
+    needs:
+      - host-checks
+      - scheduler-builds
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

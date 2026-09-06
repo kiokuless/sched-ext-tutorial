@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="350" viewBox="0 0 760 350" role="img" aria-labelledby="title desc">
+<title id="title">プロセス間のコンテキストスイッチ</title>
+<desc id="desc">一つの論理 CPU 上で A、B、A の順に実行する。A から B への切り替えでは A の状態を保存し B の状態を復元する。B の実行中は A の状態を保持し、B から A への切り替えで復元すると A は続きから再開する。切り替えも CPU 上で OS が行う処理である。</desc>
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>
+</defs>
+<rect width="760" height="350" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="18" fill="#172b3a">
+  <text x="28" y="39" font-size="20">一つの論理 CPU</text>
+  <path d="M 28 62 H 729" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="732" y="43" text-anchor="end" font-size="16" fill="#526575">時間</text>
+  <rect x="28" y="88" width="176" height="64" rx="8" fill="#e7f1fc" stroke="#1761a0"/>
+  <rect x="204" y="88" width="76" height="64" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+  <rect x="280" y="88" width="204" height="64" rx="8" fill="#fff0d7" stroke="#a25c12"/>
+  <rect x="484" y="88" width="76" height="64" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+  <rect x="560" y="88" width="172" height="64" rx="8" fill="#e7f1fc" stroke="#1761a0"/>
+  <g text-anchor="middle">
+    <text x="116" y="127">プロセス A</text>
+    <text x="242" y="127" font-size="16" fill="#526575">切替</text>
+    <text x="382" y="127">プロセス B</text>
+    <text x="522" y="127" font-size="16" fill="#526575">切替</text>
+    <text x="646" y="115">プロセス A</text>
+    <text x="646" y="140" font-size="16" fill="#1761a0">続きから再開</text>
+  </g>
+  <path d="M 242 154 V 178 M 522 154 V 178" stroke="#a9bbc6" stroke-width="2"/>
+  <g text-anchor="middle" font-size="17">
+    <text x="242" y="203" fill="#1761a0">A を保存</text>
+    <text x="242" y="231" fill="#a25c12">B を復元</text>
+    <text x="522" y="203" fill="#a25c12">B を保存</text>
+    <text x="522" y="231" fill="#1761a0">A を復元</text>
+  </g>
+  <path d="M 242 248 V 272 H 522 V 248" fill="none" stroke="#1761a0" stroke-width="2" stroke-dasharray="5 5"/>
+  <text x="382" y="303" text-anchor="middle" font-size="17" fill="#1761a0">A の実行状態を保持</text>
+</g>
+</svg>
