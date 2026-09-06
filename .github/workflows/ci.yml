@@ -39,7 +39,5 @@ jobs:
           BPF_CLANG: clang-19
         run: |
           for manifest in lab/Cargo.toml checkpoints/*/Cargo.toml; do
-            target=${manifest%/Cargo.toml}
-            target=${target//\//-}
-            CARGO_TARGET_DIR="target/ci-$target" cargo build --release --manifest-path "$manifest"
+            CARGO_TARGET_DIR=target/ci-schedulers cargo build --release --manifest-path "$manifest"
           done
