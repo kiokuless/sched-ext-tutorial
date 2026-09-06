@@ -12,7 +12,6 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 apt-get install -y \
-    bpftool \
     build-essential \
     ca-certificates \
     clang-19 \
