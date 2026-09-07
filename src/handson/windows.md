@@ -239,7 +239,6 @@ multipass get local.driver | Out-File -Encoding utf8 multipass-driver.txt
 
 各条件1回、15標本の実測値であり、別のPCや再実行時に同じ数値になることは要求しない。
 長いスライスから短いスライスへ変えると、遅延が減り、context-switches が増えることを確認できた。
-生ログは [fair](../measurements/2026-09-07-windows/fair.txt)、[長いスライス](../measurements/2026-09-07-windows/long.txt)、[短いスライス](../measurements/2026-09-07-windows/short.txt)に保存した。
 
 `make check`、全 checkpoint と `lab` のビルド、STEP=01〜04と `lab` の partial mode でのロードと SIGINT による解除、STEP=04 の system-wide mode、手動の SysRq 復旧が通った。
 PowerShell の端末から `run-step.sh 01 partial` を起動し、実際の Ctrl+C で終了できることも確認した。
@@ -251,7 +250,6 @@ Error: EXIT: runnable task stall (watchdog failed to check in for 3.001s)
 watchdog_exit=1 state=disabled
 ```
 
-[起動・解除・復旧のログ](../measurements/2026-09-07-windows/runtime.txt)と[実際のツールの版](../measurements/2026-09-07-windows/versions.txt)も併せて参照できる。
 
 ## 終了と復旧
 
