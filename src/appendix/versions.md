@@ -22,8 +22,9 @@ VM の `/etc/sched-ext-tutorial/versions` には、プロビジョニング時�
 
 ## Windows 向け追加手順の検証状況
 
-[Windows 向け手順](../handson/windows.md)は、2026年9月7日に Windows 11 Education（ビルド26200）、Ryzen 7 3800X、Multipass 1.16.3、Hyper-V、Ubuntu 26.04 amd64、Linux `7.0.0-30-generic` で検証した。
+[Windows 向け手順](../handson/windows.md)は、2026年9月8日に Windows 11 Education（ビルド26200）、Ryzen 7 3800X、MSYS2 の GNU Make 4.4.1、Multipass 1.16.3、Hyper-V、Ubuntu 26.04 amd64、Linux `7.0.0-30-generic` で検証した。
+Windows ホストで `make vm-up`、`make vm-bootstrap`、`make doctor`、`make restore`、`make build`、`make run`、`make bench`、`make reset`、`make vm-shell` を実行し、共有ソースからのビルド、ロードと解除、15標本の比較実験、watchdog 復帰を確認した。
 doctor は `aarch64` と `x86_64` を受け入れるが、検査を通ることだけで実験結果の検証済みとはしない。
 上の表と本文の測定例は、引き続き Mac / arm64 での検証記録である。
-Windows での全 checkpoint と `lab` のビルド、ロードと解除、15標本の比較実験、watchdog 復帰の結果は、[Windows 向け手順](../handson/windows.md)に記載した。
+`make check` は、同じ共有ソースを使い、ビルド成果物を VM 内のファイルシステムに置いて実行し、成功した。
 Windows の別エディション、別CPU、別バックエンドまで実機検証済みという意味ではない。

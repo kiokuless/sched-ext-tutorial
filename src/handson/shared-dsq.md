@@ -86,7 +86,7 @@ CPU が最後にタスクを取り出す先は、前章と同じローカル DSQ
 ```
 
 これで「作る」「入れる」「取り出す」が揃った。
-この二行まで追加してから、端末1（Mac 側のリポジトリ直下）でロードする。
+この二行まで追加してから、端末1（ホスト側のリポジトリ直下）でロードする。
 
 ```console
 make run STEP=lab MODE=partial
@@ -164,7 +164,7 @@ sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
 ```
 
 三つの標本を確認したら、端末1で `Ctrl+C` を押す。
-端末2で解除を確認し、Mac 側へ戻る。
+端末2で解除を確認し、ホスト側へ戻る。
 
 ```console
 cat /sys/kernel/sched_ext/state
@@ -187,7 +187,7 @@ exit
 今のコードは、独自 DSQ を一つ共有し、FIFO で取り出す。
 CPU 時間の割り当てを変えた前章に続いて、タスクを取り出す処理も自分で指定できた。
 
-完成例と比べたい場合は、Mac 側で次の差分を読む。
+完成例と比べたい場合は、ホスト側で次の差分を読む。
 
 ```console
 diff -u checkpoints/step-02-shared-dsq/src/bpf/main.bpf.c lab/src/bpf/main.bpf.c

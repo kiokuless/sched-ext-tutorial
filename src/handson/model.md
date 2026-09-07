@@ -6,7 +6,7 @@
 
 ## CPU を渡す時間
 
-Mac 側のエディタで `lab/src/bpf/main.bpf.c` を開く。
+ホスト側のエディタで `lab/src/bpf/main.bpf.c` を開く。
 前章から続けている場合は、最初の完成例が入っている。
 途中から始める場合は、残したい変更を保存してから `make restore STEP=01` で揃える。
 
@@ -39,7 +39,7 @@ const volatile u64 slice_ns = 30000000ULL;  /* 30 ms */
 
 ## 起動ログで確かめる
 
-前章と同じく、端末1は Mac のリポジトリ直下、端末2は VM 内の確認に使う。
+前章と同じく、端末1は ホストのリポジトリ直下、端末2は VM 内の確認に使う。
 前章の loader は終了し、`state` が `disabled` になっている状態から始める。
 
 端末1で、編集した lab を起動する。
@@ -69,7 +69,7 @@ sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
 ```
 
 `enabled` と三つの標本を確認したら、端末1で `Ctrl+C` を押す。
-端末2で解除を確認し、Mac 側へ戻る。
+端末2で解除を確認し、ホスト側へ戻る。
 
 ```console
 cat /sys/kernel/sched_ext/state

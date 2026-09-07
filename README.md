@@ -7,8 +7,8 @@ Linux の `sched_ext` を使い、BPF で小さな CPU scheduler を作るハン
 各変更の前に、図やコードから結果を一つ予想し、直後の説明や実行結果で確かめる構成としている。
 
 教材は Apple Silicon Mac と4 vCPUの Multipass VM を正式な実行環境とする。
-Windows 向けには、[Multipass の Ubuntu VM 内で進める手順](src/handson/windows.md)を追加している。
-Windows 11 Education / Ryzen 7 3800X / Hyper-V で、ビルド、ロードと解除、遅延比較、watchdog 復帰を検証した。
+Windows では、[MSYS2 から同じ make コマンドで進める手順](src/handson/windows.md)を使う。
+Windows 11 Education / Ryzen 7 3800X / Hyper-V で、ホストからの VM 操作、ビルド、ロードと解除、遅延比較、watchdog 復帰を検証した。
 本文のソースは `src/`、編集する scheduler は `lab/`、動作する各段階は `checkpoints/` に置いている。
 
 ## 本文を読む

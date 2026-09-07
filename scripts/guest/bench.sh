@@ -32,11 +32,11 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-"$repo_root/scripts/guest/build-workload.sh"
+bash "$repo_root/scripts/guest/build-workload.sh"
 
 sched_ext_args=()
 if [[ $case_name == step ]]; then
-    "$repo_root/scripts/guest/build-step.sh" "$step"
+    bash "$repo_root/scripts/guest/build-step.sh" "$step"
     scheduler="/var/cache/sched-ext-tutorial/target/scx-step-$step/release/scx_oreore"
     sudo "$scheduler" --partial >"$tmp_dir/scheduler.log" 2>&1 &
     scheduler_pid=$!

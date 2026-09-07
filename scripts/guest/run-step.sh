@@ -11,7 +11,7 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 step=$1
 mode=$2
 
-"$repo_root/scripts/guest/build-step.sh" "$step"
+bash "$repo_root/scripts/guest/build-step.sh" "$step"
 # Binary is built into the VM-local target directory to avoid macOS mount issues.
 binary="/var/cache/sched-ext-tutorial/target/scx-step-$step/release/scx_oreore"
 

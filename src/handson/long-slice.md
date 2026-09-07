@@ -75,7 +75,7 @@ const volatile u64 slice_ns = 2000000000ULL;  /* 2 seconds */
 VM 内の `/sys/kernel/sched_ext/state` が `disabled` になったことを確認し、VM のシェルからは `exit` で戻っておく。
 
 比較の基準として、自作スケジューラを使わず fair class で同じ負荷を動かす。
-Mac 側のリポジトリ直下で実行する。
+ホスト側のリポジトリ直下で実行する。
 
 ```console
 mkdir -p target/measurements
