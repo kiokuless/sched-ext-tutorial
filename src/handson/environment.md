@@ -51,6 +51,8 @@ make doctor
 このうち `CONFIG_SCHED_CLASS_EXT` は、カーネルに `sched_ext` が組み込まれているかを示す設定であり、無効なカーネルではそもそも scheduler をロードできない。
 BTF はカーネル内部の型情報で、BPF プログラムがカーネルの構造体を安全に参照するために必要になる。
 clang と cargo は scheduler のビルドに、bpftool と perf は観測に使う。
+自分の出力で、`fail` が付いた項目があるかを探す。
+すべての検査を通れば、次のスケジューラを動かす準備が整っている。
 `fail` があれば、ビルドやロード、測定のどこかで必要な条件が欠けている。
 [トラブルシューティング](../appendix/troubleshooting.md)で原因を確認してから進む。
 
@@ -59,3 +61,6 @@ VM のシェルへ入る場合は、次のコマンドを使う。
 ```console
 make vm-shell
 ```
+
+VM に入れたら、`exit` で Mac 側へ戻っておく。
+以降のビルドや起動は、Mac のリポジトリ直下から `make` で指示する。

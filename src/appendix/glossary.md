@@ -13,13 +13,17 @@
 - **タイムスライス**：タスクが CPU 上で連続して実行できる時間の割り当て。
 - **コンテキストスイッチ**：CPU 上で実行するタスクを別のタスクへ切り替えること。
 - **CPU-bound**：実行時間の多くを CPU 計算に使う workload。
+- **hog**：本編で CPU を使い続ける負荷タスクに付けた呼び名。負荷生成器の `cpu-hog` を二つ起動し、hog A と hog B と呼ぶ。
+- **periodic**：負荷生成器の周期タスク。予定時刻ごとに処理を再開し、その時刻からの遅れを記録する。
+- **idle**：CPU に実行するタスクがなく、空いている状態。
+- **プリエンプション**：実行中のタスクに、スライスの終了を待たず CPU を譲らせること。
 - **deadline miss**：予定時刻からの遅れが、実験で決めた許容値を超えたこと。
 - **CPU affinity**：タスクが実行できる CPU を制限する設定。本編では `taskset` で設定する。
 
 ## `sched_ext`
 
 - **`sched_ext`**：BPF プログラムで CPU scheduling policy を実装し、実行時にロードできる Linux の extensible scheduler class。
-- **`sched_ext_ops`**：BPF scheduler が実装する callback の集合。
+- **`sched_ext_ops`**：BPF scheduler の callback と設定をまとめてカーネルへ渡す構造体。
 - **DSQ（dispatch queue）**：`sched_ext` がタスクを CPU へ渡すために使う待ち行列。
 - **ローカル DSQ**：各 CPU が持つ DSQ。CPU は最終的に自分のローカル DSQ からタスクを実行する。
 - **グローバル DSQ**：カーネルが用意する、CPU 間で共有される DSQ。
@@ -43,5 +47,6 @@
 
 - **p50、p95、p99**：遅延を小さい順に並べたときの50、95、99パーセンタイル。
 - **tail latency**：遅延分布の上位側にある遅い部分。p95、p99、p99.9 など高いパーセンタイルで観測することが多い。
+- **throughput**：単位時間あたりに完了した仕事量。本編の遅延と切り替え回数だけでは判断できない。
 - **Perfetto trace**：イベントを時系列で可視化できる trace 形式。発展編では `scxtop` からの出力先として扱う。
 - **NUMA**：CPU とメモリの距離が一様ではないハードウェア構成。実機で locality を評価するときに重要になる。

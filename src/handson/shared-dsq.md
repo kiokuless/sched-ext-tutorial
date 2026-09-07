@@ -1,150 +1,193 @@
-# 自分の DSQ を作る
+# 自分の待ち行列から取り出す
 
-前章のスケジューラは、タスクをグローバル DSQ へ入れた後の取り出しをカーネルに任せていた。
-そこでは、対象タスクを区別せず、一つの FIFO へ並べていた。
+前章のコードでは、タスクをグローバル DSQ へ入れた後の取り出しを、カーネルに任せていた。
+今度は、自分で用意した待ち行列から、CPU へタスクを渡す部分も書く。
+並べ方は FIFO のままにして、取り出しを担当する場所を一つ増やす。
 
-たとえば、エディタの入力に応答する処理と、バックグラウンドで複数のファイルをビルドする処理が同じ CPU を使う場面を考える。
-入力への応答は、利用者を待たせないために早く実行したい。
-一方、バックグラウンドの計算は、実行順を後ろへ回してもよいが、処理そのものは進めたい。
-この場合には「先に計算タスクが何個も待っていても、後から来た入力への応答を、次の実行候補として優先する」という要件が生まれる。
-
-一つの FIFO では、後から並んだ応答タスクは、先に並んだ計算タスクの後ろで待つ。
-そこで、タスクをあらかじめ応答用と計算用に区別できるなら、それぞれを別の DSQ へ入れる方法が考えられる。
-`dispatch` で応答用の DSQ を先に調べ、そこが空なら計算用から取り出す、と書けば、キューへの到着順だけに従わず、種類に応じて次のタスクを選べる。
-二つの待ち行列は、この要件を実現するための一案である。
-
-この選択で変わるのは、次にどのタスクを CPU へ渡すかである。
-すでに実行中の計算タスクから直ちに CPU を取り上げるには、別の処理が必要になる。
-また、応答用のタスクが来続けても計算を進めるには、一定回数ごとに計算用からも取り出すなど、そちらへ順番を回す規則も必要である。
-
-この二種類を優先順位付きで扱う実装は、本編では作らない。
-まずは、その土台となる「自分で用意した DSQ に預け、自分で取り出す」という受け渡しを、一つの FIFO で実装する。
-複数の CPU が同じ独自 DSQ からタスクを受け取れるため、これを共有 DSQ と呼ぶ。
-DSQ 自体はカーネルが提供し、その作成と、そこからローカル DSQ へタスクを移す処理を BPF 側で指定する。
-
-## 前章のコードから変更する
-
-編集するファイルは `lab/src/bpf/main.bpf.c` である。
-前章から続けている場合は、そのまま変更を加える。
-途中から始める場合だけ、次のコマンドで前章の完成状態を復元する。
-`make restore` は lab の BPF ファイルを上書きするので、残したい変更は先に保存しておく。
-
-```console
-make restore STEP=01
-```
+BPF 側から作成を指定する待ち行列を **独自 DSQ** と呼ぶ。
+今回は複数の CPU が同じ独自 DSQ を使うので、以降は **共有 DSQ** と呼ぶ。
+キュー自体はカーネルが提供し、その作成と受け渡しを自作コードで指定する。
 
 ## 共有 DSQ を作成する
 
-独自 DSQ は、タスクを入れる前に作成しておく必要がある。
-`UEI_DEFINE(uei);` の後に DSQ の ID を定義し、`exit` callback の前に `init` を追加する。
+編集先は `lab/src/bpf/main.bpf.c` である。
+前章の loader を終了し、スライスを 20 ミリ秒へ戻して保存した状態から始める。
+途中から始める場合は、残したい変更を保存してから `make restore STEP=01` で揃える。
+
+タスクを入れる前に、共有 DSQ を作っておく。
+`UEI_DEFINE(uei);` の後に次の ID を追加する。
 
 ```c
 #define SHARED_DSQ 0
+```
 
+続いて、`exit` callback の前に次の関数を追加する。
+
+```c
 s32 BPF_STRUCT_OPS_SLEEPABLE(oreore_init)
 {
-    return scx_bpf_create_dsq(SHARED_DSQ, -1);
+	return scx_bpf_create_dsq(SHARED_DSQ, -1);
 }
 ```
 
-独自 DSQ の ID は `u64` のうち `2^63` 未満から選ぶ。
-ここでは 0 を `SHARED_DSQ` と名付けた。
-上位ビットを使う領域は、`SCX_DSQ_GLOBAL` などの組み込み ID に予約されている。
+**`init`** はスケジューラを初期化する callback である。
+この関数は、ID が `SHARED_DSQ` の待ち行列を作成する。
+関数の登録は、取り出す処理と揃えて後で行う。
 
-`BPF_STRUCT_OPS_SLEEPABLE` は、処理の途中で待機できる実行コンテキストの callback を定義する。
+<details>
+<summary>DSQ の ID と作成時の指定</summary>
+
+独自 DSQ の ID は `u64` のうち `2^63` 未満から選べる。
+上位ビットを使う領域は、`SCX_DSQ_GLOBAL` などの組み込み ID に予約されている。
+ここでは 0 を `SHARED_DSQ` と名付けた。
+
+`BPF_STRUCT_OPS_SLEEPABLE` は、途中で待機できる実行コンテキストの callback を定義する。
 メモリ確保を伴う DSQ の作成は、この `init` に置く。
 `scx_bpf_create_dsq()` の第2引数はメモリの割り当て先となる NUMA node で、-1 は特定の node を指定しない。
 
-## 入れる先と取り出す処理を変更する
+</details>
+
+## 入れるだけで CPU へ届くか
 
 `enqueue` の投入先を `SCX_DSQ_GLOBAL` から `SHARED_DSQ` に変更する。
 
 ```c
 void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
 {
-    scx_bpf_dsq_insert(p, SHARED_DSQ, slice_ns, enq_flags);
+	scx_bpf_dsq_insert(p, SHARED_DSQ, slice_ns, enq_flags);
 }
 ```
 
-投入先を変えただけでは、このキューからタスクを取り出す処理がない。
-続けて `dispatch` を追加し、共有 DSQ から呼び出し元 CPU のローカル DSQ へ、実行可能なタスクを移す。
+これでタスクは独自 DSQ に入る。
+CPU へ渡す処理も、これだけで揃っただろうか。
+
+グローバル DSQ からの取り出しはカーネルに任せていた。
+独自 DSQ には、取り出す処理を自分で用意する必要がある。
+その役割を持つのが **`dispatch`** である。
+
+`enqueue` の後に次の関数を追加する。
 
 ```c
 void BPF_STRUCT_OPS(oreore_dispatch, s32 cpu, struct task_struct *prev)
 {
-    scx_bpf_dsq_move_to_local(SHARED_DSQ, 0);
+	scx_bpf_dsq_move_to_local(SHARED_DSQ, 0);
 }
 ```
 
 CPU はローカル DSQ とグローバル DSQ に次のタスクが見つからないと、`dispatch` を呼び出す。
-この実装では共有 DSQ から一つ移すだけだが、複数の独自 DSQ を持てば、ここで取り出す順番を選べる。
+`scx_bpf_dsq_move_to_local()` は、共有 DSQ から呼び出し元 CPU のローカル DSQ へタスクを移す。
+CPU が最後にタスクを取り出す先は、前章と同じローカル DSQ である。
 
 最後に、ファイル末尾の `SCX_OPS_DEFINE` に次の二行を追加する。
-関数を書くだけでは callback として登録されない。
 
 ```c
 .dispatch   = (void *)oreore_dispatch,
 .init       = (void *)oreore_init,
 ```
 
-この二行まで揃えてからビルドし、ロードする。
+これで「作る」「入れる」「取り出す」が揃った。
+この二行まで追加してから、端末1（Mac 側のリポジトリ直下）でロードする。
 
 ```console
-make build STEP=lab
 make run STEP=lab MODE=partial
 ```
 
-別の端末から、前章と同じ方法で `state` が `enabled`、`root/ops` が `oreore` で始まることを確かめる。
-確認後はロードした端末で `Ctrl+C` を押し、`state` が `disabled` に戻ることも確認する。
+端末2から VM に入り、前章と同じ周期タスクを動かす。
+
+```console
+make vm-shell
+cat /sys/kernel/sched_ext/state
+cat /sys/kernel/sched_ext/root/ops
+sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
+    periodic --samples 3 --sched-ext
+```
+
+`enabled` と `oreore` で始まる名前、三つの標本を確認する。
+この時点では、共有 DSQ からの取り出しを自分の `dispatch` が担当している。
+
+確認したら、端末1で `Ctrl+C` を押す。
+端末2で `cat /sys/kernel/sched_ext/state` を実行し、`disabled` に戻ったことを確かめる。
+端末2は VM に入ったまま、次の変更の確認にも使う。
 
 ## 空いている CPU へ直接渡す
 
-共有 DSQ を経由する経路ができた。
-ただ、wakeup 時に空いている CPU が見つかるなら、いったん共有 DSQ へ入れる必要はない。
-`select_cpu` を次の内容に置き換える。
+共有 DSQ から取り出す経路ができた。
+wakeup したときに idle CPU が見つかるなら、そこへ直接タスクを渡すこともできる。
+
+前章の `select_cpu` は、idle CPU が見つかったかを `is_idle` で受け取っていた。
+次のように置き換え、その値を分岐に使う。
 
 ```c
 s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
-                   u64 wake_flags)
+		   u64 wake_flags)
 {
-    bool is_idle = false;
-    s32 cpu;
+	bool is_idle = false;
+	s32 cpu;
 
-    cpu = scx_bpf_select_cpu_dfl(p, prev_cpu, wake_flags, &is_idle);
-    if (is_idle)
-        scx_bpf_dsq_insert(p, SCX_DSQ_LOCAL, slice_ns, 0);
+	cpu = scx_bpf_select_cpu_dfl(p, prev_cpu, wake_flags, &is_idle);
+	if (is_idle)
+		scx_bpf_dsq_insert(p, SCX_DSQ_LOCAL, slice_ns, 0);
 
-    return cpu;
+	return cpu;
 }
 ```
 
 `is_idle` が真なら、戻り値の CPU のローカル DSQ へ直接投入する。
-この場合は `enqueue` が省略されるので、同じタスクが共有 DSQ にも入ることはない。
-空いている CPU が見つからなければ、先ほど作った `enqueue` と `dispatch` の経路を通る。
+この場合、カーネルは `enqueue` を省略するので、同じタスクが共有 DSQ にも入ることはない。
 
-グローバル DSQ の経路と比べると、共有 DSQ から取り出す `dispatch` と、左側の直接投入が加わっている。
-緑の経路を通ったタスクが `enqueue` を省略することを、矢印で確かめる。
+idle CPU が見つからなかったときは、直接投入と共有 DSQ のどちらを通るか。
+`if (is_idle)` の中を通らないため、`enqueue` が共有 DSQ へ入れ、後で `dispatch` が取り出す。
+図の中央の矢印が、その経路に当たる。
 
 <figure class="technical-figure">
 <div class="diagram-scroll" tabindex="0" role="region" aria-label="図2：共有 DSQ と idle CPU への直接投入（横スクロール可能）">
 <img src="../images/dsq-shared.svg" alt="idle CPU が見つかれば select_cpu からローカル DSQ へ直接投入する。見つからなければ enqueue、共有 DSQ、dispatch を経てローカル DSQ へ移す。">
 </div>
-<figcaption>図2：共有 DSQ と idle CPU への直接投入。狭い画面では図を横にスクロールできる。</figcaption>
+<figcaption>図2：中央は共有 DSQ を通る経路、左は idle CPU への直接投入。どちらもローカル DSQ へ届く。</figcaption>
 </figure>
 
-図の CPU 0 は受け取り先の一例である。
-共有 DSQ を使う場合は `dispatch` を呼び出した CPU、直接投入する場合は `select_cpu` が返した CPU に渡る。
+CPU 0 は受け取り先の一例である。
+共有 DSQ の経路では `dispatch` を呼んだ CPU、直接投入では `select_cpu` が返した CPU に渡る。
 
-もう一度ビルドとロードを確認し、終了してから、タスクを実際に流してみる。
-次のコマンドは scheduler のロードから負荷生成器の起動、停止までを行う。
+端末1で、変更したコードを再び起動する。
 
 ```console
-make bench CASE=step STEP=lab
+make run STEP=lab MODE=partial
 ```
 
-15 標本と集計結果が出て終了することを確認する。
-数値の読み方は[長いスライスの実験](./long-slice.md#測っている遅れ)で扱う。
-完成状態との違いは、ホスト側で次のコマンドを使って確認できる。
+VM に入ったままの端末2で、状態と周期タスクの実行を確認する。
+
+```console
+cat /sys/kernel/sched_ext/state
+sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
+    periodic --samples 3 --sched-ext
+```
+
+三つの標本を確認したら、端末1で `Ctrl+C` を押す。
+端末2で解除を確認し、Mac 側へ戻る。
+
+```console
+cat /sys/kernel/sched_ext/state
+exit
+```
+
+この出力だけでは、各タスクが直接投入と共有 DSQ のどちらを通ったかまでは分からない。
+分岐はコードと図で、変更後もタスクが実行できることは出力で確かめる。
+
+## 三種類の DSQ の役割
+
+使った待ち行列を並べると、作成と取り出しの担当が整理できる。
+
+| DSQ | 誰が用意するか | 本編での取り出し |
+|---|---|---|
+| ローカル DSQ | カーネル | その CPU が実行する |
+| グローバル DSQ | カーネル | カーネルがローカル DSQ へ渡す |
+| 独自 DSQ | 自作コードがカーネルへ作成を依頼する | 自作の `dispatch` がローカル DSQ へ渡す |
+
+今のコードは、独自 DSQ を一つ共有し、FIFO で取り出す。
+CPU 時間の割り当てを変えた前章に続いて、タスクを取り出す処理も自分で指定できた。
+
+完成例と比べたい場合は、Mac 側で次の差分を読む。
 
 ```console
 diff -u checkpoints/step-02-shared-dsq/src/bpf/main.bpf.c lab/src/bpf/main.bpf.c
@@ -152,19 +195,4 @@ diff -u checkpoints/step-02-shared-dsq/src/bpf/main.bpf.c lab/src/bpf/main.bpf.c
 
 空白や関数の配置が違っていてもよい。
 DSQ の ID、三つの scheduling callback、`init`、ops への登録を照合する。
-
-## 経路を確かめる
-
-空いている CPU がある場合と、すべて使用中の場合について、タスクが通る callback と DSQ を順に書いてみる。
-それぞれで `enqueue` が呼ばれるかも答える。
-
-<details>
-<summary>解答と理由</summary>
-
-空いている CPU を見つけた場合は、`select_cpu` からその CPU のローカル DSQ へ直接投入し、`enqueue` を省略する。
-見つからない場合は、`enqueue` が共有 DSQ へ入れ、後で `dispatch` がローカル DSQ へ移す。
-どちらの経路でも、CPU が実行するタスクを取り出す先はローカル DSQ である。
-
-</details>
-
-DSQ の制約と直接投入の条件は、Linux 7.0 の [Scheduling Cycle](https://docs.kernel.org/7.0/scheduler/sched-ext.html#scheduling-cycle) に記載されている。
+本編以外の経路と callback の条件は、Linux 7.0 の [Scheduling Cycle](https://docs.kernel.org/7.0/scheduler/sched-ext.html#scheduling-cycle) で確認できる。

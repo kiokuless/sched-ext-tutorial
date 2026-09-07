@@ -1,95 +1,106 @@
-# 壊れたスケジューラから戻る
+# 壊して、戻る
 
-`sched_ext` は、CPU を誰に配るかという OS の中心的な判断を、実行時に読み込んだ BPF scheduler へ任せられる。
-それは便利である一方、かなり危険にも見える。
-CPU を配るコードそのものを壊せるのなら、どうして試行錯誤しながら開発できるのだろうか。
+system-wide mode では、操作や修復に使う shell も自作スケジューラに従う。
+そのスケジューラがタスクを CPU へ渡さなくなると、shell 自身も動けなくなる。
+最後は、あらかじめ用意した壊れた完成例で、カーネルによる復帰を確かめる。
 
-これまでの章では、`enqueue` されたタスクを必ずどこかの DSQ に入れていた。
-今度は受け取ったタスクを放置し、CPU へ戻す経路をなくしてみる。
-ロードできても仕事を進められないスケジューラを、カーネルがどう検出するか確かめる。
+## どの矢印がなくなるか
 
-CPU scheduler は、普通のアプリケーションより失敗の影響が大きい。
-Web サーバの一プロセスが止まっても shell から調査できるが、CPU を配る scheduler が runnable task を選ばなくなると、その shell 自身が動けなくなる。
-system-wide で scheduler を差し替えるということは、修復に使う道具も同じ scheduler の判断に依存するということである。
+これまでの `enqueue` は、受け取ったタスクを DSQ に入れていた。
+最後の完成例は、その処理を取り除いている。
 
-`sched_ext` で実験しやすい理由の一つは、この失敗を前提にした復帰経路が用意されていることにある。
-BPF verifier は、ロード時に BPF プログラムがカーネル内で許されない動作をしないかを検査する。
-一方、watchdog が見るのは、ロードに成功した scheduler が実行中にタスクを長時間進められなくしていないか、という別の種類の失敗である。
-「ロードできるコード」と「scheduler として正しく前進するコード」は同じではない。
+```c
+void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
+{
+	/* Intentionally drop every runnable task for the watchdog exercise. */
+	(void)p;
+	(void)enq_flags;
+}
+```
 
-故障させると、次の順で復帰することを期待する。
+このタスクは、共有 DSQ へ進むか、それとも渡されないまま待つか。
+投入する呼び出しがないので、どの DSQ にも進まない。
+この完成例には後から取り出す経路もなく、タスクは CPU を待ち続ける。
+
+`enqueue` で直ちに DSQ へ入れないこと自体は、API の違反ではない。
+BPF 側でタスクを保持し、後から `dispatch` で渡す実装も認められている。
+この完成例の問題は、その後の経路もなくタスクを放置することにある。
+
+## ロード後に停滞を見つける仕組み
+
+BPF verifier は、ロード時にプログラムがカーネル内で許されない動作をしないか検査する。
+検査を通っても、スケジューラとしてタスクを進められるとは限らない。
+実行中に runnable task の停滞を検出するのが、カーネルの watchdog である。
 
 <figure class="technical-figure">
 <div class="diagram-scroll" tabindex="0" role="region" aria-label="watchdog が壊れた scheduler から復帰させる流れ（横スクロール可能）">
 <img src="../images/watchdog-recovery.svg" alt="上段はタスクが enqueue から DSQ へ進めず停滞する状態。カーネルの watchdog が停滞を検出して自作 scheduler を解除すると、下段のようにタスクが fair class で再び CPU を得る。">
 </div>
-<figcaption>× はタスクを DSQ へ渡す経路の欠落を示す。watchdog はカーネル側で停滞を検出する。</figcaption>
+<figcaption>× はタスクを DSQ へ渡す経路の欠落。watchdog が検出すると、自作 scheduler が外れる。</figcaption>
 </figure>
 
-最後の checkpoint は、`enqueue` されたタスクをどの DSQ にも入れない。
-実行可能なタスクは CPU を待ち続ける。
+watchdog は異常を検出すると自作スケジューラを外し、対象のタスクを fair class へ戻す。
+この `oreore_broken` は、`sched_ext_ops` の `timeout_ms` を 3 秒に設定している。
+教材の環境では数秒での復帰を期待するが、3 秒以内に VM が必ず応答を再開する保証ではない。
+ホストが VM を実行しない時間なども、実際の待ち時間へ影響する。
 
-```c
-void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
-{
-    /* Intentionally drop every runnable task for the watchdog exercise. */
-    (void)p;
-    (void)enq_flags;
-}
-```
+## 故障を実行する
 
-`enqueue` で直ちに DSQ へ入れないこと自体は、API の違反ではない。
-BPF 側でタスクを保持し、後から `dispatch` で渡す実装も認められている。
-この checkpoint の問題は、後から渡す経路もなく、タスクを待たせ続けることである。
-許される保持方法は Linux 7.0 の [Scheduling Cycle](https://docs.kernel.org/7.0/scheduler/sched-ext.html#scheduling-cycle) に記載されている。
+この操作は教材 VM の中で行われる。
+`MODE=system` なので shell や通常のサービスも対象となり、watchdog が動くまでの数秒間、端末の応答が止まることを見込んでおく。
+リアルタイムクラスなど、`sched_ext` の対象外のタスクまで止める実験ではない。
 
-runnable なタスクが放置され続けると、カーネルの watchdog が異常を検出して scheduler を外し、タスクを fair class へ戻す。
-`oreore_broken` は timeout を3秒に設定している。
-教材の環境では数秒での復帰を期待するが、3 秒は VM が必ずその時間内に応答を再開する保証ではない。
-ホストが VM を実行しない時間なども、実際の待ち時間に影響する。
-
-## 実行する
+前章のスケジューラが `disabled` に戻った状態から、端末1（Mac 側のリポジトリ直下）で起動する。
+`STEP=05` は壊れた完成例を使う指定で、lab のコードは変更しない。
 
 ```console
 make run STEP=05 MODE=system
 ```
 
-MODE=system であることに注意する。
-通常の shell やサービスも自作 scheduler の対象に入る。
-リアルタイムクラスなど、`sched_ext` の対象外のタスクまで止める実験ではない。
-watchdog が動くまでの数秒間、shell を含めて端末の応答が止まるが、これは想定内の挙動である。
-復帰を待つ。
+応答が止まったら復帰を待つ。
+自動復帰しない場合は、Mac 側の別の端末から次を実行する。
 
-復帰したら、別の端末から VM に入り、状態が `disabled` に戻ったことを確認する。
+```console
+make reset
+```
+
+## 復帰した証拠を読む
+
+端末が動き始めたら、状態と停止理由の二つを読む。
+端末2から VM に入り、状態を確認する。
 
 ```console
 make vm-shell
 cat /sys/kernel/sched_ext/state
 ```
 
-実行端末には、`uei_report` が取得した停止理由が表示される。
-`uei_report` は、scheduler がカーネルから受け取った exit 情報を人間が読める形に整形して出力する loader 側の補助である。
-[最小のスケジューラ](./global.md)で使った `exit` callback は、この情報を記録していた。
-停止理由が runnable task の stall を示すことを読み取り、単なる手動終了やロード失敗と区別する。
+`disabled` に戻っていれば、自作スケジューラは外れている。
+続いて、端末1に表示された停止理由を見る。
 
-2026 年 9 月 6 日の教材 VM では、停止理由に次の行が出た。
-このとき `state` は `disabled` に戻った。
+2026 年 9 月 6 日の教材 VM では、次の出力があり、`state` は `disabled` に戻った。
 
 ```text
 Error: EXIT: runnable task stall (watchdog failed to check in for 3.001s)
 make: *** [run] Error 1
 ```
 
-異常停止を loader がエラーとして報告するため、`make run` も正常終了にはならない。
-この実験では、その終了ステータスだけで復帰失敗とは判断せず、stall の報告と状態の復帰を確かめる。
+ここで停滞の検出を示すのは、`runnable task stall` と `Error 1` のどちらだろうか。
+理由が分かるのは `runnable task stall` のほうである。
+`Error 1` は異常停止を loader がエラーとして報告した結果で、それだけでは復帰の成否は分からない。
 
-端末が再び動いただけでは、watchdog による復帰を確認したことにはならない。
-停止理由と `disabled` への変化を合わせて記録すると、タスクの放置が検出され、スケジューラが外されたことを確認できる。
+自分の出力でも、stall の報告と `disabled` の組み合わせを確認する。
+手動で `make reset` した場合は、自動復帰を確認した記録と分けておく。
+確認後は端末2で `exit` を実行し、Mac 側へ戻る。
 
-## 手動で止める
+<details>
+<summary>停止理由が loader へ届くまで</summary>
 
-自動復帰しない場合は、ホスト側から次を実行する。
+[一行変えて動かす](./model.md)で読んだ `exit` callback は、スケジューラが外れた理由を `UEI_RECORD` で記録する。
+loader 側の **`uei_report`** が、その exit 情報を人間が読める形で出力する。
 
-```console
-make reset
-```
+タスクを後で渡すための保持方法は、Linux 7.0 の [Scheduling Cycle](https://docs.kernel.org/7.0/scheduler/sched-ext.html#scheduling-cycle) に記載されている。
+
+</details>
+
+同じ `disabled` への復帰でも、`Ctrl+C` で止めた場合と watchdog が止めた場合では、停止理由が違う。
+状態だけでなく理由も読めれば、自作スケジューラの終了を見分けられる。

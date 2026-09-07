@@ -1,18 +1,18 @@
 # 目次
 
-- [はじめに](./introduction.md)
+[はじめに](./introduction.md)
 
 # ハンズオン
 
 - [実験環境を準備する](./handson/environment.md)
-- [`sched_ext` が変えるもの](./handson/model.md)
-- [最小のスケジューラを動かす](./handson/global.md)
-- [自分の DSQ を作る](./handson/shared-dsq.md)
+- [最初のスケジューラを動かす](./handson/global.md)
+- [一行変えて動かす](./handson/model.md)
+- [自分の待ち行列から取り出す](./handson/shared-dsq.md)
 - [1秒後に戻れないタスク](./handson/long-slice.md)
 - [スライスを短くする](./handson/short-slice.md)
-- [VM 全体を切り替える](./handson/system-wide.md)
-- [壊れたスケジューラから戻る](./handson/watchdog.md)
-- [観測結果を説明する](./handson/conclusion.md)
+- [VM 全体へ広げる](./handson/system-wide.md)
+- [壊して、戻る](./handson/watchdog.md)
+- [次の方針を選ぶ](./handson/conclusion.md)
 
 # 発展編
 

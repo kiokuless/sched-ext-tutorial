@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
@@ -22,11 +23,8 @@ jobs:
         run: cargo install mdbook --version 0.5.4 --locked
       - name: Check the book and host tools
         run: make check
-      - name: Configure GitHub Pages
-        if: github.event_name == 'push'
-        uses: actions/configure-pages@v5
       - name: Upload GitHub Pages artifact
-        if: github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
           path: book
@@ -52,7 +50,7 @@ jobs:
           done
 
   deploy-pages:
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs:
       - host-checks
       - scheduler-builds
@@ -67,6 +65,8 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-24.04
     steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
