@@ -1,0 +1,23 @@
+    Finished `release` profile [optimized] target(s) in 0.03s
+sample,late_ms,deadline_missed
+1,5.189,false
+2,0.071,false
+3,0.083,false
+4,0.067,false
+5,0.070,false
+6,0.067,false
+7,0.067,false
+8,0.067,false
+9,0.067,false
+10,2.195,false
+11,0.082,false
+12,0.069,false
+13,0.066,false
+14,0.066,false
+15,0.070,false
+
+average_late_ms=0.553
+max_late_ms=5.189
+deadline_misses=0/15
+
+              5199      context-switches

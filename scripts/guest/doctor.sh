@@ -27,7 +27,16 @@ check_command() {
     fi
 }
 
-check_equal architecture "$(uname -m)" aarch64
+architecture=$(uname -m)
+case "$architecture" in
+    aarch64|x86_64)
+        printf 'ok   %-18s %s\n' architecture "$architecture"
+        ;;
+    *)
+        printf 'fail %-18s expected aarch64 or x86_64, got %s\n' architecture "$architecture"
+        failed=1
+        ;;
+esac
 check_equal vcpus "$(nproc)" 4
 
 if zgrep -q 'CONFIG_SCHED_CLASS_EXT=y' /proc/config.gz 2>/dev/null; then

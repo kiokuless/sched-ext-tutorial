@@ -5,6 +5,7 @@
 # ハンズオン
 
 - [実験環境を準備する](./handson/environment.md)
+  - [Windows で実験環境を準備する](./handson/windows.md)
 - [最初のスケジューラを動かす](./handson/global.md)
 - [一行変えて動かす](./handson/model.md)
 - [自分の待ち行列から取り出す](./handson/shared-dsq.md)
