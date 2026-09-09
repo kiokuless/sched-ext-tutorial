@@ -20,7 +20,7 @@ sched-ext-tutorial/
 │       └── main.rs         ← カーネルへ読み込むプログラム
 └── checkpoints/
     ├── step-01-global/     ← 最初に動かす完成例
-    ├── step-02-shared-dsq/ ← 独自の待ち行列を追加した完成例
+    ├── step-02-long-slice/ ← スライスを2秒にした完成例
     └── …
 ```
 
@@ -67,12 +67,17 @@ make run STEP=lab MODE=partial
 ```
 
 `make run` はビルドも行い、その後 VM 内で loader を起動する。
-`MODE=partial` では、明示的に **`SCHED_EXT`** というスケジューリング方針を選んだタスクだけが、自作スケジューラの対象になる。
-このように対象を絞る使い方を **partial switching** と呼ぶ。
 
-操作に使う shell は、通常のタスクへ CPU 時間を分配する Linux 標準の **fair class** に残る。
-実験対象だけを自作の方針で動かすため、端末まで同時に止まりにくい。
-fair class の負荷も CPU を使うので、実験の待ち時間には影響する。
+**partial mode**（`MODE=partial`）では、指定したタスクだけを自作スケジューラで動かせる。
+この教材では、負荷生成器に `--sched-ext` を付けると、そのタスクが対象になる。
+`scx_oreore` を起動しただけでは、シェルや通常のサービスは従来どおり Linux 標準の **fair class**（通常のタスクに CPU 時間を分配する仕組み）で動く。
+
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="partial mode の起動前後と対象タスクの実行（横スクロール可能）">
+<img src="../images/partial-startup.svg" alt="起動前はシェルと通常のサービスを fair class が担当する。partial mode で起動しても担当は変わらず、自作スケジューラの対象はまだない。periodic を --sched-ext 付きで実行すると、そのタスクだけを sched_ext 上の自作スケジューラが担当する。どちらのクラスも VM の CPU を使う。">
+</div>
+<figcaption>この手順での変化。あらかじめ SCHED_EXT を選んだタスクがない状態を示す。リアルタイムクラスなどは省略している。</figcaption>
+</figure>
 
 起動すると、端末1に次の行が出る。
 
@@ -112,11 +117,7 @@ oreore_0.1.0_aarch64_unknown_linux_gnu
 
 ## 対象タスクを一つ動かす
 
-ロードはできた。
-では、shell が動いているだけで、自作スケジューラがタスクを動かしたと確認できるだろうか。
-
-partial mode の shell は fair class に残っている。
-そこで、明示的に `SCHED_EXT` を選ぶタスクを一つ起動する。
+自作スケジューラの対象になるタスクを一つ動かしてみよう。
 教材の負荷生成器には、1 秒間隔の予定時刻に処理を再開し、その遅れを出力する **`periodic`** がある。
 
 端末2で負荷生成器をビルドする。
@@ -136,6 +137,9 @@ sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
 `--samples 3` は三つの標本を記録する指定で、`--sched-ext` はこのタスクを自作スケジューラの対象へ入れる指定である。
 見出しに続いて三つの標本と集計が出て、エラーなくプロンプトへ戻ることを確かめる。
 これで、対象タスクが処理を進め、終了したことを確認できる。
+
+自作の方針で動いていても、この実行だけで目に見える速さの違いが出るとは限らない。
+待ち時間の差は、後の[1秒後に戻れないタスク](./long-slice.md)で、複数のタスクを競合させて測る。
 
 ## 終了して元のスケジューラへ戻す
 
@@ -162,6 +166,8 @@ disabled
 
 loader は、BPF object を開き、設定を与えてから load、attach する。
 partial mode では、load 前に `SCX_OPS_SWITCH_PARTIAL` を設定する。
+これにより、**`SCHED_EXT`** というスケジューリング方針を選んだタスクだけが対象になる。
+この切り替え方を **partial switching** と呼ぶ。
 負荷生成器側は、`--sched-ext` を指定すると `sched_setscheduler(2)` で自分の方針を `SCHED_EXT` に変更する。
 
 attach で作られた **BPF link** が、スケジューラとの接続を表す。

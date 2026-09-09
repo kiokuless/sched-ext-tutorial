@@ -6,10 +6,9 @@
 
 - [実験環境を準備する](./handson/environment.md)
 - [最初のスケジューラを動かす](./handson/global.md)
-- [一行変えて動かす](./handson/model.md)
-- [自分の待ち行列から取り出す](./handson/shared-dsq.md)
 - [1秒後に戻れないタスク](./handson/long-slice.md)
-- [スライスを短くする](./handson/short-slice.md)
+- [最初の main.bpf.c を読む](./handson/model.md)
+- [自分の待ち行列から取り出す](./handson/shared-dsq.md)
 - [VM 全体へ広げる](./handson/system-wide.md)
 - [壊して、戻る](./handson/watchdog.md)
 - [次の方針を選ぶ](./handson/conclusion.md)

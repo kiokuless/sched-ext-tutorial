@@ -1,0 +1,21 @@
+Measured: 2026-09-07 JST
+Environment: tutorial VM, Ubuntu 26.04, 4 vCPU, aarch64
+Scheduler: fair class (no BPF scheduler)
+Workload: two CPU hogs (60-second limit), five independent 1000 ms sleeps
+Affinity: all three tasks pinned to CPU 0
+Measurement: elapsed_ms includes the requested 1000 ms sleep; late_ms subtracts it
+Source: scripts/guest/bench.sh and tools/workload/src/main.rs
+
+VM_NAME="sched-ext-lab" ./scripts/vm-exec.sh ./scripts/guest/bench.sh "fair" "01"
+    Finished `release` profile [optimized] target(s) in 0.01s
+sample,elapsed_ms,late_ms
+1,1001.763,1.763
+2,1000.062,0.062
+3,1000.062,0.062
+4,1000.064,0.064
+5,1000.063,0.063
+
+max_elapsed_ms=1001.763
+max_late_ms=1.763
+
+              1705      context-switches                                                      

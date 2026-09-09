@@ -30,6 +30,18 @@ enum Command {
         sched_ext: bool,
     },
 
+    /// Measure each fixed-duration sleep independently.
+    Sleep {
+        #[arg(long, default_value_t = 1_000)]
+        period_ms: u64,
+
+        #[arg(long, default_value_t = 5)]
+        samples: u64,
+
+        #[arg(long)]
+        sched_ext: bool,
+    },
+
     /// Wake periodically and report how late execution resumed.
     Periodic {
         #[arg(long, default_value_t = 1_000)]
@@ -83,6 +95,42 @@ fn cpu_hog(seconds: u64, sched_ext: bool) -> Result<()> {
     Ok(())
 }
 
+fn measure_sleeps(period: Duration, samples: u64, mut report: impl FnMut(u64, Duration)) {
+    for sample in 1..=samples {
+        let start = Instant::now();
+        thread::sleep(period);
+        report(sample, start.elapsed());
+    }
+}
+
+fn sleep_workload(period_ms: u64, samples: u64, sched_ext: bool) -> Result<()> {
+    if period_ms == 0 {
+        bail!("--period-ms must be greater than zero");
+    }
+    if samples == 0 {
+        bail!("--samples must be greater than zero");
+    }
+    enter_sched_ext(sched_ext)?;
+    let period = Duration::from_millis(period_ms);
+    let mut max_elapsed = Duration::ZERO;
+    println!("sample,elapsed_ms,late_ms");
+    measure_sleeps(period, samples, |sample, elapsed| {
+        max_elapsed = max_elapsed.max(elapsed);
+        println!(
+            "{sample},{:.3},{:.3}",
+            elapsed.as_secs_f64() * 1_000.0,
+            elapsed.saturating_sub(period).as_secs_f64() * 1_000.0
+        );
+    });
+    println!();
+    println!("max_elapsed_ms={:.3}", max_elapsed.as_secs_f64() * 1_000.0);
+    println!(
+        "max_late_ms={:.3}",
+        max_elapsed.saturating_sub(period).as_secs_f64() * 1_000.0
+    );
+    Ok(())
+}
+
 fn periodic(period_ms: u64, samples: u64, tolerance_ms: u64, sched_ext: bool) -> Result<()> {
     if period_ms == 0 {
         bail!("--period-ms must be greater than zero");
@@ -128,6 +176,11 @@ fn periodic(period_ms: u64, samples: u64, tolerance_ms: u64, sched_ext: bool) ->
 fn main() -> Result<()> {
     match Cli::parse().command {
         Command::CpuHog { seconds, sched_ext } => cpu_hog(seconds, sched_ext),
+        Command::Sleep {
+            period_ms,
+            samples,
+            sched_ext,
+        } => sleep_workload(period_ms, samples, sched_ext),
         Command::Periodic {
             period_ms,
             samples,
@@ -140,6 +193,26 @@ fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejects_empty_sleep_experiments() {
+        assert!(sleep_workload(0, 1, false).is_err());
+        assert!(sleep_workload(1, 0, false).is_err());
+    }
+
+    #[test]
+    fn each_sample_sleeps_even_after_a_delayed_report() {
+        let period = Duration::from_millis(2);
+        let mut count = 0;
+        measure_sleeps(period, 3, |sample, elapsed| {
+            count += 1;
+            assert_eq!(sample, count);
+            assert!(elapsed >= period);
+            // Reporting past the next interval must not skip the next sleep.
+            thread::sleep(period * 2);
+        });
+        assert_eq!(count, 3);
+    }
 
     #[test]
     fn rejects_zero_period() {

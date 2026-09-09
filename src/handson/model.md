@@ -1,125 +1,21 @@
-# 一行変えて動かす
+# 最初の main.bpf.c を読む
 
-前章では、用意されたスケジューラで周期タスクを動かし、終了できた。
-今度は、一度 CPU を渡すときの時間を 20 ミリ秒から 30 ミリ秒へ変える。
-自分が変えた値を起動ログで確かめた後、その値がタスクへ渡る場所を追ってみよう。
+前章では、`lab/src/bpf/main.bpf.c` の `slice_ns` を変えて、sleep の表示間隔が変わるところを確かめた。
+このファイルには、その時間をタスクへ割り当てる処理や、実行待ちの列へタスクを入れる処理が書かれている。
+Mac 側のエディタで開き、コードと実際の動きを対応させて読んでみよう。
+前章の最後まで進めた状態は、`checkpoints/step-03-short-slice/src/bpf/main.bpf.c` と同じである。
 
-## CPU を渡す時間
+## callback をカーネルへ登録する
 
-Mac 側のエディタで `lab/src/bpf/main.bpf.c` を開く。
-前章から続けている場合は、最初の完成例が入っている。
-途中から始める場合は、残したい変更を保存してから `make restore STEP=01` で揃える。
+`main.bpf.c` は、Linux カーネルから呼ばれる BPF プログラムである。
+カーネルは、アプリケーションの各スレッドをタスクとして扱い、CPU を割り当てる。
+このファイルには、その割り当てを決めるための処理が書かれている。
 
-ファイルの先頭付近に、次の定数がある。
+この C ファイルには、処理の入口となる `main()` がない。
+代わりに、カーネルが必要な場面で呼ぶ関数を定義している。
+このように、呼び出してもらうために登録する関数を **callback** と呼ぶ。
 
-```c
-const volatile u64 slice_ns = 20000000ULL;  /* 20 ms, kernel default */
-```
-
-一度の割り当てでタスクが使える CPU 時間を **タイムスライス** と呼ぶ。
-`slice_ns` はその長さをナノ秒で指定しており、`20000000` は 20 ミリ秒に当たる。
-タスクが途中で眠れば CPU を手放すため、毎回 20 ミリ秒間走り続けるという意味ではない。
-
-続いて、ファイルの中央にある次の一行を探す。
-
-```c
-scx_bpf_dsq_insert(p, SCX_DSQ_GLOBAL, slice_ns, enq_flags);
-```
-
-タスクを CPU へ渡すための待ち行列を **dispatch queue（DSQ）** と呼ぶ。
-この一行は、タスク `p` を組み込みのグローバル DSQ へ入れ、`slice_ns` の時間を割り当てる。
-
-時間だけを変えるなら、待ち行列を指定する `SCX_DSQ_GLOBAL` と、長さを指定する `slice_ns` のどちらを変えるか。
-今回は `slice_ns` の初期値だけを変えればよい。
-先ほどの定義を次の一行に置き換え、保存する。
-
-```c
-const volatile u64 slice_ns = 30000000ULL;  /* 30 ms */
-```
-
-## 起動ログで確かめる
-
-前章と同じく、端末1は Mac のリポジトリ直下、端末2は VM 内の確認に使う。
-前章の loader は終了し、`state` が `disabled` になっている状態から始める。
-
-端末1で、編集した lab を起動する。
-
-```console
-make run STEP=lab MODE=partial
-```
-
-起動ログの `slice` を探す。
-ログはマイクロ秒単位なので、30 ミリ秒なら `30000 us` と表示される。
-
-```text
-scx_oreore started (mode=partial, slice=30000 us)
-```
-
-`20000 us` のままなら、ファイルを保存したか、編集先が lab か、`STEP=lab` を指定したかを確かめる。
-`30000 us` になれば、変更した値がビルドとロードを経て使われている。
-
-端末2から VM に入り、周期タスクを再び動かす。
-負荷生成器は前章でビルド済みである。
-
-```console
-make vm-shell
-cat /sys/kernel/sched_ext/state
-sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
-    periodic --samples 3 --sched-ext
-```
-
-`enabled` と三つの標本を確認したら、端末1で `Ctrl+C` を押す。
-端末2で解除を確認し、Mac 側へ戻る。
-
-```console
-cat /sys/kernel/sched_ext/state
-exit
-```
-
-`disabled` に戻ったら、C ファイルの定義とコメントを 20 ミリ秒へ戻して保存する。
-
-```c
-const volatile u64 slice_ns = 20000000ULL;  /* 20 ms, kernel default */
-```
-
-ソースの保存は、次回のビルドに使う値を変える操作である。
-すでにロード中の値を変更するには、今回のように終了して、ビルドとロードをやり直す。
-
-<details>
-<summary>ナノ秒と設定値の宣言</summary>
-
-1 ミリ秒は 1,000 マイクロ秒、1,000,000 ナノ秒である。
-ソースの `slice_ns` はナノ秒、起動ログの `slice` はマイクロ秒を使う。
-
-`u64` は符号なし64ビット整数で、`ULL` は `unsigned long long` 型の整数リテラルを表す。
-`const volatile` は、BPF 側から読み取り専用の設定値として使うための宣言である。
-
-loader は load 前なら、**rodata** と呼ばれる読み取り専用データ領域の初期値を変更できる。
-教材の loader は `--slice-us` が指定された場合だけ値を上書きする。
-本文の `make run` では指定しないため、C ファイルの初期値が使われる。
-
-</details>
-
-## この一行を呼ぶのは誰か
-
-値の変更は反映された。
-同じファイルには C の `main()` がないが、待ち行列へ入れる一行はいつ動くのだろうか。
-
-その一行を囲む関数を見ると、`oreore_enqueue` という名前が付いている。
-
-```c
-void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
-{
-	scx_bpf_dsq_insert(p, SCX_DSQ_GLOBAL, slice_ns, enq_flags);
-}
-```
-
-これは、カーネルがスケジューリングの途中で呼ぶ callback である。
-**`enqueue`** は、スケジューラが受け取った実行可能なタスクを待ち行列へ入れる場面に対応する。
-実行可能、つまり CPU を得れば動ける状態を **runnable** とも呼ぶ。
-
-関数を書くだけでは、その場面で呼ばれるようにはならない。
-ファイル末尾の `SCX_OPS_DEFINE` が、役割と関数を対応付けている。
+ファイル末尾の `SCX_OPS_DEFINE` で、カーネルが呼ぶ役割と、このファイルで定義した関数を対応付けている。
 
 ```c
 SCX_OPS_DEFINE(oreore_ops,
@@ -130,44 +26,26 @@ SCX_OPS_DEFINE(oreore_ops,
 	       .name       = "oreore");
 ```
 
-`.enqueue = (void *)oreore_enqueue` を読むと、カーネルが求める `enqueue` の役割に、このファイルの関数が登録されている。
-callback と設定をまとめてカーネルへ渡す構造体を **`sched_ext_ops`** と呼ぶ。
-`.name` の `oreore` は、前章で確認したスケジューラ名の先頭と同じである。
+`SCX_OPS_DEFINE` は、関数と設定をまとめた **`sched_ext_ops`** という構造体を定義するマクロである。
+ここでは、そのまとまりに `oreore_ops` という名前を付けている。
+たとえば `.enqueue = (void *)oreore_enqueue` は、「タスクを列へ入れる場面では `oreore_enqueue` を呼ぶ」という対応を指定している。この対応付けをカーネルへ読み込んで有効にするのが、Rust の loader（`lab/src/main.rs`）である。
 
-<details>
-<summary>関数定義と四つの引数</summary>
+関数に続く `timeout_ms = 5000` は、実行可能なのに長く動けないタスクを検出するためのタイムアウトを5秒に設定している。
+タイムアウトによる監視は、後の[壊して、戻る](./watchdog.md)で使う。
 
-`BPF_STRUCT_OPS` は、カーネルから callback として呼べる形で関数を定義するマクロである。
-`p` はタスクを表す `task_struct` へのポインタ、`enq_flags` は投入時の条件を表すフラグである。
-`scx_bpf_dsq_insert()` は、カーネルが BPF プログラムへ公開している関数である。
+ここで登録した三つの関数は、それぞれ次の場面で呼ばれる。
 
-| 引数 | 渡す値 | 指定すること |
+| 関数 | 呼ばれる場面の例 | このコードがすること |
 |---|---|---|
-| 第1引数 | `p` | どのタスクか |
-| 第2引数 | `SCX_DSQ_GLOBAL` | どの待ち行列か |
-| 第3引数 | `slice_ns` | どれだけの CPU 時間か |
-| 第4引数 | `enq_flags` | どの投入条件か |
+| `oreore_select_cpu` | 待機していたタスクが実行可能になったときや、新しいタスクを初めて動かすとき | CPU の候補を返す |
+| `oreore_enqueue` | タスクが待機から復帰したときや、スライスを使い切って別のタスクと交代するとき | 実行待ちの列に入れる |
+| `oreore_exit` | スケジューラが終了する時 | 終了理由を記録する |
 
-</details>
+## oreore_select_cpu で CPU の候補を選ぶ
 
-## 待ち行列から CPU へ
-
-タスクはグローバル DSQ に入った。
-そこから CPU へ渡す部分は、まだ自分のコードに見当たらない。
-
-各 CPU は、自分の **ローカル DSQ** からタスクを取り出して実行する。
-そこが空なら、カーネルが用意した **グローバル DSQ** も参照できる。
-今のコードで投入処理だけを書けばよいのは、カーネルに取り出しを任せているためである。
-
-<figure class="technical-figure">
-<div class="diagram-scroll" tabindex="0" role="region" aria-label="図1：グローバル DSQ を使う最小構成（横スクロール可能）">
-<img src="../images/dsq-global.svg" alt="wakeup したタスクは select_cpu、enqueue、グローバル DSQ の順に進む。カーネルが CPU ごとのローカル DSQ へ移し、CPU が実行する。">
-</div>
-<figcaption>図1：青い callback が自作コード。グローバル DSQ からの取り出しはカーネルが担当する。</figcaption>
-</figure>
-
-図の入口にある **`select_cpu`** は、wakeup したタスクを動かす CPU の候補を選ぶ callback である。
-最小例では、次のように組み込み処理へ委ねている。
+待機していたタスクが再び実行可能になることを **wakeup** と呼ぶ。
+wakeup したタスクが使える CPU が複数あれば、カーネルは `oreore_select_cpu` を呼び、実行先の候補を求める。
+新しく作られたタスクを初めて動かすときにも、この CPU 選択が行われる。
 
 ```c
 s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
@@ -179,16 +57,111 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 }
 ```
 
-`prev_cpu` は前回動いていた CPU で、組み込み処理は空いている CPU を優先して候補を選ぶ。
-空いている状態を **idle** と呼ぶ。
-`is_idle` で idle CPU を見つけたかを受け取れるが、この最小例では CPU 番号だけを戻り値に使う。
+`SCX_OPS_DEFINE` で登録する callback は、カーネルから呼び出せる BPF プログラムとして定義する。
+`BPF_STRUCT_OPS` は、そのために必要な定型的な記述をまとめ、関数定義を簡潔に書けるようにするマクロである。[^callback-definition]
+最初の引数が関数名で、ここでは `oreore_select_cpu` という関数を定義している。
 
-グローバル DSQ は複数の CPU が参照するため、最終的に動く CPU は候補と同じとは限らない。
-図の CPU 0 と CPU 1 は受け取り先の例であり、一つのタスクを両方へ複製する図ではない。
+冒頭の `SCX_OPS_DEFINE` にある `.select_cpu = (void *)oreore_select_cpu` は、定義した関数を CPU 選択の callback として登録する指定である。
+カーネルがこの関数を呼ぶとき、対象タスクや前回動いていた CPU などの情報を引数で渡す。
 
-残る `oreore_exit` は、スケジューラが外れた理由を記録する callback である。
-`UEI_DEFINE` と `UEI_RECORD` は、その記録を loader へ渡すための補助として使う。
-通常終了だけでなく、[壊して、戻る](./watchdog.md)でもこの記録を読む。
+今の実装では、その情報を `scx_bpf_select_cpu_dfl()` に渡し、CPU 選びを任せている。
+これは、タスクが使える CPU の中から空いているものを探す、カーネルが用意した関数である。
+`return` は、この関数が選んだ CPU 番号をそのままカーネルへ返す。
+たとえば CPU 1 が選ばれれば、`oreore_select_cpu` も `1` を返す。
 
-スライスの値を変えた場所から、`enqueue` 内の `scx_bpf_dsq_insert()` の第3引数までを、コード上でたどってみる。
-自分で変えた時間はここからタスクへ渡り、取り出しはカーネルが引き受けている。
+このコードの役割は、CPU の候補を返すところまでである。
+タスクを実行待ちの列へ入れる処理は、その後の `oreore_enqueue` が担当する。
+
+使える CPU が一つだけなら、候補を選ぶ必要がないため、この callback は省略される。
+前章の `taskset -c 0` は、この場合に当たる。[^cpu-selection]
+
+`is_idle` は、選ばれた CPU が空いている状態（**idle**）かどうかを受け取る変数だが、今のコードではその値を使っていない。
+次章の[空いている CPU へ直接渡す](./shared-dsq.md#空いている-cpu-へ直接渡す)では、この関数を書き換え、`is_idle` を使って空いている CPU へタスクを直接渡す処理を加える。
+今は「`oreore_select_cpu` はカーネルから呼ばれる関数で、CPU 選びを既定の処理に任せ、その番号を返す」と押さえておけばよい。
+
+## oreore_enqueue で実行待ちの列に入れる
+
+実行可能になったタスクは、CPU の順番を待つために待ち行列へ入る。
+このコードでは、wakeup 後にカーネルが `oreore_enqueue` を呼び、そのタスクを引数の `p` に渡す。
+CPU が一つに固定され、`select_cpu` が省略された場合も、`enqueue` は呼ばれる。
+
+また、実行中のタスクがスライスを使い切り、ほかのタスクと交代する際にも呼ばれる。
+交代したタスクは引き続き実行可能なので、再び列に入って次の順番を待つ。
+このように、実行を待つタスクを列へ入れる処理が **`enqueue`** である。
+
+I/O などの待機に入るタスクは、待ちが解消されるまで実行できない。
+そのため、待機に入る時点では実行待ちの列に戻さず、wakeup したときに `enqueue` で戻す。
+
+```c
+void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
+{
+	scx_bpf_dsq_insert(p, SCX_DSQ_GLOBAL, slice_ns, enq_flags);
+}
+```
+
+`p` は列に入れるタスクを指し、`enq_flags` は投入時の条件を表す。
+この関数は結果の値を返さないため、戻り値の型は `void` になっている。
+
+タスクを CPU へ渡すために使う待ち行列を **dispatch queue（DSQ）** と呼ぶ。
+`scx_bpf_dsq_insert()` は、指定した DSQ へタスクを入れる関数である。
+この一行では、四つの引数で次の内容を指定している。
+`slice_ns` は前章で変更した値で、現在は 10 ミリ秒である。
+
+| 引数 | このコードでの指定 |
+|---|---|
+| `p` | カーネルから渡されたタスクを入れる |
+| `SCX_DSQ_GLOBAL` | 組み込みのグローバル DSQ に入れる |
+| `slice_ns` | 今回の CPU 時間として 10 ミリ秒を割り当てる |
+| `enq_flags` | カーネルから渡された投入条件をそのまま使う |
+
+**グローバル DSQ** は、カーネルが用意した、複数の CPU で共有する待ち行列である。
+このコードは、実行を待つタスクをそこへ入れ、入った順に取り出す **FIFO** という並べ方を使っている。
+タスクを入れる時点でスライスも指定するため、前章で変えた `slice_ns` がここからタスクへ渡る。
+
+### 列から取り出すのはカーネル
+
+このファイルには、グローバル DSQ からタスクを取り出す関数がない。
+そこはカーネルが担当している。
+
+各 CPU には、その CPU が次に実行するタスクを置く **ローカル DSQ** がある。
+それが空なら、カーネルはグローバル DSQ から、その CPU で実行できるタスクをローカル DSQ へ移す。
+CPU はローカル DSQ からタスクを取り出して実行する。
+
+<figure class="technical-figure">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="グローバル DSQ を使うタスクの循環（横スクロール可能）">
+<img src="../images/dsq-global-cycle.svg" alt="待機から復帰したタスクは select_cpu と enqueue を経てグローバル DSQ に入る。カーネルがタスク A を CPU 1 のローカル DSQ へ移し、CPU 1 が実行する。スライスを使い切って交代し、まだ実行可能なら、select_cpu を通らず enqueue でグローバル DSQ へ戻る。">
+</div>
+</figure>
+
+グローバル DSQ は複数の CPU が参照するため、実際に取り出す CPU が、先ほどの `select_cpu` の候補と同じとは限らない。
+図の CPU 1 は今回の実行先の一例であり、再投入後には別の CPU が取り出すこともある。
+
+図の右側の矢印は、スライスを使い切って交代したタスク A が、引き続き実行可能なまま再投入される流れである。
+この場合は `oreore_select_cpu` を通らず、`oreore_enqueue` がグローバル DSQ へ戻す。
+
+## oreore_exit で終了理由を記録する
+
+カーネルは、BPF スケジューラを取り外す際に `oreore_exit` を呼ぶ。
+loader の停止によって接続が解放された場合も、異常を検出してスケジューラを停止する場合も、この関数で終了理由を受け取る。
+
+これはスケジューラ全体の終了に対する通知であり、個々のタスクの終了通知ではない。
+引数の `ei` には、スケジューラが終了した理由が入っている。
+
+```c
+void BPF_STRUCT_OPS(oreore_exit, struct scx_exit_info *ei)
+{
+	UEI_RECORD(uei, ei);
+}
+```
+
+ファイル先頭の `UEI_DEFINE(uei);` は、終了理由を保存する場所を `uei` という名前で用意する。
+`UEI_RECORD` は、そこへ `ei` の内容を書き込む。
+Rust 側の loader がこの記録を読み、端末へ表示する。
+`Ctrl+C` で停止したときに出た次の行も、この仕組みによるものである。
+
+```text
+EXIT: unregistered from user space
+```
+
+[^callback-definition]: マクロの定義は、scx v1.1.3 の [`BPF_STRUCT_OPS`](https://github.com/sched-ext/scx/blob/v1.1.3/scheds/include/scx/common.bpf.h#L227-L229) と [`SCX_OPS_DEFINE`](https://github.com/sched-ext/scx/blob/v1.1.3/scheds/include/scx/compat.bpf.h#L477-L481) で確認できる。
+[^cpu-selection]: CPU 選択の処理は、Linux 7.0 の [`scx_bpf_select_cpu_dfl()`](https://github.com/torvalds/linux/blob/v7.0/kernel/sched/ext_idle.c#L909-L941) と、CPU を一つに固定した場合の [`select_task_rq()`](https://github.com/torvalds/linux/blob/v7.0/kernel/sched/core.c#L3313-L3337) で確認できる。

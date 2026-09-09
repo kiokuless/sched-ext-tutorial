@@ -60,16 +60,15 @@ fi
 # for the same core.  With a single hog, the 10 ms slice shows little
 # context-switch increase because there is no peer task to preempt it.
 for _ in 1 2; do
-    sudo taskset -c 0 "$workload" cpu-hog --seconds 20 "${sched_ext_args[@]}" &
+    sudo taskset -c 0 "$workload" cpu-hog --seconds 60 "${sched_ext_args[@]}" &
     hog_pids+=("$!")
 done
 sleep 0.5
 
 sudo perf stat -a -C 0 -e context-switches -o "$tmp_dir/perf.txt" -- \
-    taskset -c 0 "$workload" periodic \
+    taskset -c 0 "$workload" sleep \
         --period-ms 1000 \
-        --samples 15 \
-        --tolerance-ms 100 \
+        --samples 5 \
         "${sched_ext_args[@]}"
 
 echo

@@ -9,7 +9,7 @@
 
 char _license[] SEC("license") = "GPL";
 
-const volatile u64 slice_ns = 20000000ULL;  /* 20 ms, kernel default */
+const volatile u64 slice_ns = 10000000ULL;  /* 10 milliseconds */
 
 UEI_DEFINE(uei);
 

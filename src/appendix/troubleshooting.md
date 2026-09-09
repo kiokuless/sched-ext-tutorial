@@ -21,6 +21,19 @@ bootstrap が完了していない状態では、検査対象のツールが揃�
 sudo /var/cache/sched-ext-tutorial/target/scx-step-lab/release/scx_oreore --partial -v
 ```
 
+## スライスを変えたのに起動ログが古い
+
+`make build` だけでは、既定の `STEP=01` をビルドする。
+編集した lab を使う場合は `make run STEP=lab MODE=partial` を実行する。
+このコマンドには lab のビルドも含まれる。
+
+`slice_ns = 2000000000ULL` は2秒で、起動ログでは `slice=2000000 us` になる。
+値が合わなければ、エディタで保存したファイルが `lab/src/bpf/main.bpf.c` かを確認する。
+コメントに書いた時間は動作へ影響しないが、数値に合わせて更新しておく。
+
+VM 内のビルドキャッシュよりソースの更新日時が古いと、Cargo が変更前の BPF を再利用することがある。
+教材のビルドスクリプトでは C ファイルの内容のハッシュも監視し、更新日時だけに依存せず変更を検知する。
+
 ## scheduler が残っている
 
 ```console
@@ -37,8 +50,8 @@ make reset
 1. `/sys/kernel/sched_ext/state` が `enabled` になっている
 2. `root/ops` が `oreore` で始まっている
 3. 負荷生成器が `--sched-ext` 付きで動いている
-4. CPU-bound タスクと周期タスクが `taskset -c 0` で固定されている
-5. `STEP=03` の2秒スライスを使っている
+4. 計算タスクと sleep タスクが `taskset -c 0` で固定されている
+5. `STEP=02` の2秒スライスを使っている
 
 前提が揃っていても、ホスト側の停止時間が混ざる場合がある。
 数値が一度だけ外れたことを scheduler の効果と断定しない。

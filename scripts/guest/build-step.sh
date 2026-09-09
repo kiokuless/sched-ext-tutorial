@@ -15,7 +15,12 @@ step_dir=$(resolve_step "$repo_root" "$step")
 # Use the VM-local filesystem for build artifacts to avoid macOS mount issues.
 target_dir="/var/cache/sched-ext-tutorial/target/scx-step-$step"
 
-BPF_CLANG=clang-19 CARGO_TARGET_DIR="$target_dir" \
+# Shared/restored sources can have older mtimes than the VM-local Cargo cache.
+# Make BPF content changes invalidate the build script even in that case.
+bpf_source_hash=$(sha256sum "$step_dir/src/bpf/main.bpf.c" | cut -d ' ' -f 1)
+
+SCX_TUTORIAL_BPF_SOURCE_HASH="$bpf_source_hash" \
+    BPF_CLANG=clang-19 CARGO_TARGET_DIR="$target_dir" \
     CARGO_INCREMENTAL=0 \
     cargo build --release --locked --offline --manifest-path "$step_dir/Cargo.toml"
 

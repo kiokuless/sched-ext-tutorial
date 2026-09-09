@@ -1,0 +1,22 @@
+Measured: 2026-09-07 JST
+Environment: tutorial VM, Ubuntu 26.04, 4 vCPU, aarch64
+Scheduler: global DSQ, partial mode, STEP=02
+Workload: two CPU hogs (60-second limit), five independent 1000 ms sleeps
+Affinity: all three tasks pinned to CPU 0
+Measurement: elapsed_ms includes the requested 1000 ms sleep; late_ms subtracts it
+Source: scripts/guest/bench.sh and tools/workload/src/main.rs
+
+VM_NAME="sched-ext-lab" ./scripts/vm-exec.sh ./scripts/guest/bench.sh "step" "02"
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.13s
+sample,elapsed_ms,late_ms
+1,3519.627,2519.627
+2,4001.984,3001.984
+3,4001.988,3001.988
+4,4001.981,3001.981
+5,4001.994,3001.994
+
+max_elapsed_ms=4001.994
+max_late_ms=3001.994
+
+               217      context-switches                                                      

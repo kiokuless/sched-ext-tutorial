@@ -13,3 +13,6 @@ additional-css = ["theme/diagrams.css"]
 additional-js = ["theme/diagrams.js"]
 git-repository-url = "https://github.com/kiokuless/sched-ext-tutorial"
 edit-url-template = "https://github.com/kiokuless/sched-ext-tutorial/edit/main/{path}"
+
+[output.html.redirect]
+"handson/short-slice.html" = "long-slice.html#スライスを短くしてみる"

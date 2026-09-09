@@ -11,8 +11,9 @@ BPF 側から作成を指定する待ち行列を **独自 DSQ** と呼ぶ。
 ## 共有 DSQ を作成する
 
 編集先は `lab/src/bpf/main.bpf.c` である。
-前章の loader を終了し、スライスを 20 ミリ秒へ戻して保存した状態から始める。
-途中から始める場合は、残したい変更を保存してから `make restore STEP=01` で揃える。
+スライスが 10 ミリ秒の状態から始める。
+loader が動いていれば、先に終了する。
+途中から始める場合は、残したい変更を保存してから `make restore STEP=03` で揃える。
 
 タスクを入れる前に、共有 DSQ を作っておく。
 `UEI_DEFINE(uei);` の後に次の ID を追加する。
@@ -92,7 +93,7 @@ CPU が最後にタスクを取り出す先は、前章と同じローカル DSQ
 make run STEP=lab MODE=partial
 ```
 
-端末2から VM に入り、前章と同じ周期タスクを動かす。
+端末2から VM に入り、最初の起動確認と同じ周期タスクを動かす。
 
 ```console
 make vm-shell
@@ -140,10 +141,10 @@ idle CPU が見つからなかったときは、直接投入と共有 DSQ のど
 図の中央の矢印が、その経路に当たる。
 
 <figure class="technical-figure">
-<div class="diagram-scroll" tabindex="0" role="region" aria-label="図2：共有 DSQ と idle CPU への直接投入（横スクロール可能）">
+<div class="diagram-scroll" tabindex="0" role="region" aria-label="共有 DSQ と idle CPU への直接投入（横スクロール可能）">
 <img src="../images/dsq-shared.svg" alt="idle CPU が見つかれば select_cpu からローカル DSQ へ直接投入する。見つからなければ enqueue、共有 DSQ、dispatch を経てローカル DSQ へ移す。">
 </div>
-<figcaption>図2：中央は共有 DSQ を通る経路、左は idle CPU への直接投入。どちらもローカル DSQ へ届く。</figcaption>
+<figcaption>中央は共有 DSQ を通る経路、左は idle CPU への直接投入。どちらもローカル DSQ へ届く。</figcaption>
 </figure>
 
 CPU 0 は受け取り先の一例である。
@@ -185,12 +186,12 @@ exit
 | 独自 DSQ | 自作コードがカーネルへ作成を依頼する | 自作の `dispatch` がローカル DSQ へ渡す |
 
 今のコードは、独自 DSQ を一つ共有し、FIFO で取り出す。
-CPU 時間の割り当てを変えた前章に続いて、タスクを取り出す処理も自分で指定できた。
+スライスの変更に続いて、タスクを取り出す処理も自分で指定できた。
 
 完成例と比べたい場合は、Mac 側で次の差分を読む。
 
 ```console
-diff -u checkpoints/step-02-shared-dsq/src/bpf/main.bpf.c lab/src/bpf/main.bpf.c
+diff -u checkpoints/step-04-shared-dsq/src/bpf/main.bpf.c lab/src/bpf/main.bpf.c
 ```
 
 空白や関数の配置が違っていてもよい。

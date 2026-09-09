@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1000" viewBox="0 0 1280 1000" role="img" aria-labelledby="title desc">
+  <title id="title">グローバル DSQ を使うタスクの循環</title>
+  <desc id="desc">複数の CPU を使えるタスクの例。待機から復帰すると、oreore_select_cpu が CPU の候補を返し、oreore_enqueue がグローバル DSQ に投入する。図ではカーネルがタスク A を CPU 1 のローカル DSQ へ移し、CPU 1 が実行する。スライスを使い切ってほかのタスクと交代し、引き続き実行可能なら、select_cpu を通らず oreore_enqueue で再投入する。グローバル DSQ にあるタスクの実行先は固定されていない。</desc>
+  <!-- SPDX-License-Identifier: CC-BY-4.0 -->
+  <!-- Source: https://github.com/torvalds/linux/blob/v7.0/Documentation/scheduler/sched-ext.rst -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#526575"/></marker>
+    <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#087f75"/></marker>
+  </defs>
+  <rect width="1280" height="1000" rx="16" fill="#fff"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" fill="#172b3a">
+    <text x="56" y="54" font-size="30" font-weight="700">グローバル DSQ を使うタスクの循環</text>
+    <text x="56" y="87" font-size="19" fill="#526575">複数の CPU を使えるタスク A が、スライスを使い切って交代する例</text>
+
+    <!-- Wakeup is an entry into the cycle, not part of every re-enqueue. -->
+    <text x="60" y="131" font-size="17" fill="#526575">待機から復帰したとき</text>
+    <rect x="60" y="148" width="240" height="76" rx="10" fill="#eef2f5" stroke="#a9bbc6" stroke-width="1.5"/>
+    <text x="180" y="180" text-anchor="middle" font-size="21" font-weight="600">待機から復帰</text>
+    <text x="180" y="208" text-anchor="middle" font-size="18" fill="#526575">wakeup</text>
+    <path d="M 302 186 H 356" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="360" y="148" width="300" height="76" rx="10" fill="#e7f1fc" stroke="#1761a0" stroke-width="1.5"/>
+    <text x="510" y="180" text-anchor="middle" font-size="22" font-weight="600">oreore_select_cpu</text>
+    <text x="510" y="208" text-anchor="middle" font-size="18" fill="#526575">CPU の候補を返す</text>
+    <path d="M 662 186 H 896" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="900" y="148" width="245" height="76" rx="10" fill="#e7f1fc" stroke="#1761a0" stroke-width="1.5"/>
+    <text x="1022.5" y="180" text-anchor="middle" font-size="22" font-weight="600">oreore_enqueue</text>
+    <text x="1022.5" y="208" text-anchor="middle" font-size="18" fill="#526575">列へ入れる</text>
+
+    <!-- Global FIFO: take from the left; append on the right. -->
+    <text x="260" y="278" font-size="25" font-weight="700">グローバル DSQ</text>
+    <text x="478" y="278" font-size="18" fill="#526575">SCX_DSQ_GLOBAL</text>
+    <text x="260" y="310" font-size="17" fill="#526575">取り出し側（先頭）</text>
+    <text x="980" y="310" text-anchor="end" font-size="17" fill="#526575">投入側（末尾）</text>
+    <rect x="260" y="328" width="720" height="88" rx="10" fill="#f6f8fa" stroke="#a9bbc6" stroke-width="1.5"/>
+    <rect x="260" y="328" width="180" height="88" rx="10" fill="#e3f5f0" stroke="#087f75" stroke-width="2"/>
+    <path d="M 440 328 V 416 M 620 328 V 416 M 800 328 V 416" stroke="#a9bbc6" stroke-width="1.5"/>
+    <text x="350" y="382" text-anchor="middle" font-size="24" font-weight="700" fill="#087f75">タスク A</text>
+    <text x="530" y="382" text-anchor="middle" font-size="24">タスク B</text>
+    <text x="710" y="382" text-anchor="middle" font-size="24">タスク C</text>
+    <text x="890" y="382" text-anchor="middle" font-size="28" fill="#526575">…</text>
+    <path d="M 1022.5 226 V 352 Q 1022.5 372 1002.5 372 H 984" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+    <!-- A single concrete transfer. Other CPUs have their own local DSQs. -->
+    <rect x="170" y="546" width="870" height="211" rx="14" fill="#fafcfd" stroke="#d8e2e8" stroke-width="1.5"/>
+    <path d="M 257 372 H 120 Q 100 372 100 392 V 505 Q 100 525 120 525 H 475 Q 495 525 495 545 V 559" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+    <text x="180" y="471" font-size="23" font-weight="700" fill="#087f75">① カーネルがタスク A を取り出す</text>
+    <text x="180" y="501" font-size="19" fill="#526575">CPU 1 のローカル DSQ が空き、タスク A を実行できる場合</text>
+
+    <g text-anchor="middle">
+      <rect x="200" y="563" width="170" height="56" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="285" y="598" font-size="19">ローカル DSQ</text>
+      <path d="M 285 621 V 647" fill="none" stroke="#a9bbc6" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="200" y="651" width="170" height="88" rx="10" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="285" y="704" font-size="25" font-weight="600">CPU 0</text>
+
+      <rect x="410" y="563" width="170" height="56" rx="9" fill="#e3f5f0" stroke="#087f75" stroke-width="2"/>
+      <text x="495" y="598" font-size="19" fill="#087f75">ローカル DSQ</text>
+      <path d="M 495 621 V 647" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+      <rect x="410" y="651" width="170" height="88" rx="10" fill="#e3f5f0" stroke="#087f75" stroke-width="2"/>
+      <text x="495" y="688" font-size="25" font-weight="700" fill="#087f75">CPU 1</text>
+      <text x="495" y="718" font-size="18" fill="#087f75">タスク A を実行</text>
+
+      <rect x="620" y="563" width="170" height="56" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="705" y="598" font-size="19">ローカル DSQ</text>
+      <path d="M 705 621 V 647" fill="none" stroke="#a9bbc6" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="620" y="651" width="170" height="88" rx="10" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="705" y="704" font-size="25" font-weight="600">CPU 2</text>
+
+      <rect x="830" y="563" width="170" height="56" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="915" y="598" font-size="19">ローカル DSQ</text>
+      <path d="M 915 621 V 647" fill="none" stroke="#a9bbc6" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="830" y="651" width="170" height="88" rx="10" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="915" y="704" font-size="25" font-weight="600">CPU 3</text>
+    </g>
+
+    <!-- Runnable after slice exhaustion: enqueue again, without select_cpu. -->
+    <path d="M 495 741 V 830 Q 495 850 515 850 H 1180 Q 1200 850 1200 830 V 206 Q 1200 186 1180 186 H 1149" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+    <text x="530" y="791" font-size="23" font-weight="700" fill="#087f75">② スライスを使い切って交代</text>
+    <text x="530" y="820" font-size="19" fill="#526575">タスク A は引き続き実行可能</text>
+    <text x="645" y="893" font-size="23" font-weight="700" fill="#087f75">③ enqueue でグローバル DSQ へ戻す</text>
+    <text x="645" y="924" font-size="19" fill="#526575">この再投入では select_cpu を呼ばない</text>
+
+    <path d="M 56 950 H 1224" stroke="#d8e2e8"/>
+    <text x="56" y="980" font-size="18" fill="#526575">実行先はグローバル DSQ 内で固定されない。次の実行では、別の CPU が取り出すこともある。</text>
+  </g>
+</svg>
