@@ -19,7 +19,7 @@
 重みに応じた公平性を扱わない FIFO scheduler なら、`running` と `stopping` で仮想時刻を計算する理由はない。
 
 なお、`init` と `exit` は本編ですでに使っている。
-共有 DSQ の作成に使った `init` と、停止理由を記録した `exit` は、scheduler 全体の寿命に対応する callback である。
+偶数用と奇数用の共有 DSQ の作成に使った `init` と、停止理由を記録した `exit` は、scheduler 全体の寿命に対応する callback である。
 一方、`init_task` と `exit_task` はタスクごとの寿命に対応し、粒度が違う。
 
 各 callback の正確なシグネチャは、Linux 7.0 の `sched_ext` 文書と、ビルド時に使用する scx v1.1.3 の `compat.bpf.h` を参照する。

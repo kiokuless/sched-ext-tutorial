@@ -9,6 +9,7 @@ mdbook build
 mdbook test
 cargo fmt --all --check
 cargo test --workspace
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests
 
 while IFS= read -r manifest; do
     cargo fmt --manifest-path "$manifest" --all --check

@@ -13,8 +13,8 @@ const volatile u64 slice_ns = 10000000ULL;  /* 10 milliseconds */
 
 UEI_DEFINE(uei);
 
-#define EVEN_DSQ 0
-#define ODD_DSQ 1
+#define TEAM_A_DSQ 0
+#define TEAM_B_DSQ 1
 
 /* Each CPU remembers which shared DSQ to try first next time. */
 struct {
@@ -34,7 +34,7 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 
 void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
 {
-	u64 dsq = (p->tgid % 2 == 0) ? EVEN_DSQ : ODD_DSQ;
+	u64 dsq = bpf_strncmp(p->comm, 6, "team_a") == 0 ? TEAM_A_DSQ : TEAM_B_DSQ;
 
 	scx_bpf_dsq_insert(p, dsq, slice_ns, enq_flags);
 }
@@ -61,10 +61,10 @@ s32 BPF_STRUCT_OPS_SLEEPABLE(oreore_init)
 {
 	s32 err;
 
-	err = scx_bpf_create_dsq(EVEN_DSQ, -1);
+	err = scx_bpf_create_dsq(TEAM_A_DSQ, -1);
 	if (err)
 		return err;
-	return scx_bpf_create_dsq(ODD_DSQ, -1);
+	return scx_bpf_create_dsq(TEAM_B_DSQ, -1);
 }
 
 void BPF_STRUCT_OPS(oreore_exit, struct scx_exit_info *ei)

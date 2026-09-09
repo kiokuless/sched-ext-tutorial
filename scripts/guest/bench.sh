@@ -3,13 +3,21 @@
 set -euo pipefail
 
 if (( $# != 2 )); then
-    echo "usage: $0 fair|step STEP" >&2
+    echo "usage: $0 fair|step|dsq STEP" >&2
     exit 2
 fi
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 case_name=$1
 step=$2
+
+if [[ $case_name == dsq ]]; then
+    "$repo_root/scripts/guest/build-step.sh" "$step"
+    "$repo_root/scripts/guest/build-workload.sh"
+    exec sudo python3 "$repo_root/scripts/guest/dsq_experiment.py" \
+        --scheduler "/var/cache/sched-ext-tutorial/target/scx-step-$step/release/scx_oreore"
+fi
+
 # Binary is built into the VM-local target directory to avoid macOS mount issues.
 workload="/var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload"
 scheduler_pid=
@@ -52,7 +60,7 @@ if [[ $case_name == step ]]; then
         exit 1
     fi
 elif [[ $case_name != fair ]]; then
-    echo "CASE must be fair or step" >&2
+    echo "CASE must be fair, step or dsq" >&2
     exit 2
 fi
 

@@ -16,3 +16,5 @@ edit-url-template = "https://github.com/kiokuless/sched-ext-tutorial/edit/main/{
 
 [output.html.redirect]
 "handson/short-slice.html" = "long-slice.html#スライスを短くしてみる"
+"handson/system-wide.html" = "../advanced/system-wide.html"
+"handson/watchdog.html" = "../advanced/watchdog.html"

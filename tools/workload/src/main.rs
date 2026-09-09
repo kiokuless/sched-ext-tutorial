@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+mod race;
+
 use std::hint::black_box;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -21,6 +23,24 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Command {
+    /// Estimate fixed-work units per CPU second for the A/B experiment.
+    RaceCalibrate {
+        #[arg(long, default_value_t = 0)]
+        cpu: usize,
+    },
+
+    /// Run a fixed amount of work, publishing progress without sleeping.
+    RaceWorker {
+        #[arg(long)]
+        name: String,
+        #[arg(long)]
+        units: u64,
+        #[arg(long, default_value_t = 0)]
+        cpu: usize,
+        #[arg(long)]
+        progress: std::path::PathBuf,
+    },
+
     /// Consume CPU time without sleeping.
     CpuHog {
         #[arg(long, default_value_t = 20)]
@@ -175,6 +195,13 @@ fn periodic(period_ms: u64, samples: u64, tolerance_ms: u64, sched_ext: bool) ->
 
 fn main() -> Result<()> {
     match Cli::parse().command {
+        Command::RaceCalibrate { cpu } => race::calibrate(cpu),
+        Command::RaceWorker {
+            name,
+            units,
+            cpu,
+            progress,
+        } => race::worker(&name, units, cpu, &progress),
         Command::CpuHog { seconds, sched_ext } => cpu_hog(seconds, sched_ext),
         Command::Sleep {
             period_ms,

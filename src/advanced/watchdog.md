@@ -1,13 +1,13 @@
 # 壊して、戻る
 
-system-wide mode では、操作や修復に使う shell も自作スケジューラに従う。
+[VM 全体へ広げる](./system-wide.md)で使った system-wide mode では、操作や修復に使う shell も自作スケジューラに従う。
 そのスケジューラがタスクを CPU へ渡さなくなると、shell 自身も動けなくなる。
-最後は、あらかじめ用意した壊れた完成例で、カーネルによる復帰を確かめる。
+あらかじめ用意した壊れた完成例で、カーネルによる復帰を確かめる。
 
 ## どの矢印がなくなるか
 
 これまでの `enqueue` は、受け取ったタスクを DSQ に入れていた。
-最後の完成例は、その処理を取り除いている。
+完成例 `STEP=05` は、その処理を取り除いている。
 
 ```c
 void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
@@ -50,7 +50,7 @@ watchdog は異常を検出すると自作スケジューラを外し、対象�
 `MODE=system` なので shell や通常のサービスも対象となり、watchdog が動くまでの数秒間、端末の応答が止まることを見込んでおく。
 リアルタイムクラスなど、`sched_ext` の対象外のタスクまで止める実験ではない。
 
-前章のスケジューラが `disabled` に戻った状態から、端末1（Mac 側のリポジトリ直下）で起動する。
+実行中のスケジューラを終了し、状態が `disabled` に戻ったことを確認してから、端末1（Mac 側のリポジトリ直下）で起動する。
 `STEP=05` は壊れた完成例を使う指定で、lab のコードは変更しない。
 
 ```console
@@ -95,7 +95,7 @@ make: *** [run] Error 1
 <details>
 <summary>停止理由が loader へ届くまで</summary>
 
-[一行変えて動かす](./model.md)で読んだ `exit` callback は、スケジューラが外れた理由を `UEI_RECORD` で記録する。
+[最初の main.bpf.c を読む](../handson/model.md)で読んだ `exit` callback は、スケジューラが外れた理由を `UEI_RECORD` で記録する。
 loader 側の **`uei_report`** が、その exit 情報を人間が読める形で出力する。
 
 タスクを後で渡すための保持方法は、Linux 7.0 の [Scheduling Cycle](https://docs.kernel.org/7.0/scheduler/sched-ext.html#scheduling-cycle) に記載されている。

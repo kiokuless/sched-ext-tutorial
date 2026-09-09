@@ -1,0 +1,26 @@
+Measured: 2026-09-09 JST
+Environment: tutorial VM, Ubuntu 26.04, 4 vCPU, aarch64
+Scheduler: global DSQ, partial mode, STEP=03, 10 ms slice
+Workload: three even-PID and one odd-PID single-threaded CPU hogs
+Affinity: all four workers pinned to CPU 0
+Measurement: 10 seconds after warm-up; deltas of /proc/PID/schedstat runtime
+Share denominator: sum of the four workers' CPU runtimes
+Source: scripts/guest/dsq_experiment.py and tools/workload/src/main.rs
+Note: a pre-existing CPU hog was paused during both measurements to avoid interference
+
+VM_NAME="sched-ext-lab" ./scripts/vm-exec.sh ./scripts/guest/bench.sh "dsq" "03"
+    Finished `release` profile [optimized] target(s) in 0.05s
+    Finished `release` profile [optimized] target(s) in 0.01s
+scx_oreore started (mode=partial, slice=10000 us)
+EXIT: unregistered from user space
+kernel=7.0.0-30-generic
+scheduler=/var/cache/sched-ext-tutorial/target/scx-step-03/release/scx_oreore
+cpu=0,even=3,odd=1,elapsed_s=10.008
+pid,parity,cpu_ms,share_percent
+212136,even,2309.2,25.0
+212138,even,2309.3,25.0
+212140,even,2304.7,24.9
+212135,odd,2315.2,25.1
+even_share_percent=74.9
+odd_share_percent=25.1
+scheduler_state_after=disabled

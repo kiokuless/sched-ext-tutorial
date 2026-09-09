@@ -31,7 +31,7 @@ SCX_OPS_DEFINE(oreore_ops,
 たとえば `.enqueue = (void *)oreore_enqueue` は、「タスクを列へ入れる場面では `oreore_enqueue` を呼ぶ」という対応を指定している。この対応付けをカーネルへ読み込んで有効にするのが、Rust の loader（`lab/src/main.rs`）である。
 
 関数に続く `timeout_ms = 5000` は、実行可能なのに長く動けないタスクを検出するためのタイムアウトを5秒に設定している。
-タイムアウトによる監視は、後の[壊して、戻る](./watchdog.md)で使う。
+タイムアウトによる監視は、発展編の[壊して、戻る](../advanced/watchdog.md)で使う。
 
 ここで登録した三つの関数は、それぞれ次の場面で呼ばれる。
 
@@ -76,7 +76,8 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 前章の `taskset -c 0` は、この場合に当たる。[^cpu-selection]
 
 `is_idle` は、選ばれた CPU が空いている状態（**idle**）かどうかを受け取る変数だが、今のコードではその値を使っていない。
-次章の[空いている CPU へ直接渡す](./shared-dsq.md#空いている-cpu-へ直接渡す)では、この関数を書き換え、`is_idle` を使って空いている CPU へタスクを直接渡す処理を加える。
+次章の[偶数用と奇数用に振り分ける](./shared-dsq.md#oreore_enqueue-で偶数用と奇数用に振り分ける)でも、この関数は CPU の候補を返す役割のまま使う。
+タスクを分類する処理は、後から呼ばれる `enqueue` に加える。
 今は「`oreore_select_cpu` はカーネルから呼ばれる関数で、CPU 選びを既定の処理に任せ、その番号を返す」と押さえておけばよい。
 
 ## oreore_enqueue で実行待ちの列に入れる
