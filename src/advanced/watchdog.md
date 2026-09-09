@@ -4,7 +4,7 @@
 そのスケジューラがタスクを CPU へ渡さなくなると、shell 自身も動けなくなる。
 あらかじめ用意した壊れた完成例で、カーネルによる復帰を確かめる。
 
-## どの矢印がなくなるか
+## タスクを DSQ へ投入しない実装
 
 これまでの `enqueue` は、受け取ったタスクを DSQ に入れていた。
 完成例 `STEP=05` は、その処理を取り除いている。
@@ -18,19 +18,16 @@ void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
 }
 ```
 
-このタスクは、共有 DSQ へ進むか、それとも渡されないまま待つか。
-投入する呼び出しがないので、どの DSQ にも進まない。
-この完成例には後から取り出す経路もなく、タスクは CPU を待ち続ける。
+この `enqueue` はどの DSQ にもタスクを投入せず、完成例には後から取り出す処理もない。
+そのため、タスクは実行可能なまま CPU を待ち続ける。
 
-`enqueue` で直ちに DSQ へ入れないこと自体は、API の違反ではない。
-BPF 側でタスクを保持し、後から `dispatch` で渡す実装も認められている。
-この完成例の問題は、その後の経路もなくタスクを放置することにある。
+`enqueue` で直ちに DSQ へ入れない実装でも、BPF 側で保持し、後から `dispatch` でタスクを渡すことは認められている。
+この完成例で停滞する原因は、後から実行させる処理もなく、タスクを放置していることにある。
 
 ## ロード後に停滞を見つける仕組み
 
-BPF verifier は、ロード時にプログラムがカーネル内で許されない動作をしないか検査する。
-検査を通っても、スケジューラとしてタスクを進められるとは限らない。
-実行中に runnable task の停滞を検出するのが、カーネルの watchdog である。
+BPF verifier の検査を通ったプログラムでも、スケジューラとしてタスクを進められるとは限らない。
+verifier がロード時に許されない動作がないかを検査するのに対し、カーネルの watchdog は、実行中に実行可能なタスクの停滞を検出する。
 
 <figure class="technical-figure">
 <div class="diagram-scroll" tabindex="0" role="region" aria-label="watchdog が壊れた scheduler から復帰させる流れ（横スクロール可能）">
@@ -84,9 +81,8 @@ Error: EXIT: runnable task stall (watchdog failed to check in for 3.001s)
 make: *** [run] Error 1
 ```
 
-ここで停滞の検出を示すのは、`runnable task stall` と `Error 1` のどちらだろうか。
-理由が分かるのは `runnable task stall` のほうである。
-`Error 1` は異常停止を loader がエラーとして報告した結果で、それだけでは復帰の成否は分からない。
+`runnable task stall` は、watchdog がタスクの停滞を検出したことを示す。
+`Error 1` は異常停止を loader がエラーとして報告した結果であり、それだけでは停止理由も復帰の成否も分からない。
 
 自分の出力でも、stall の報告と `disabled` の組み合わせを確認する。
 手動で `make reset` した場合は、自動復帰を確認した記録と分けておく。
@@ -101,6 +97,3 @@ loader 側の **`uei_report`** が、その exit 情報を人間が読める形�
 タスクを後で渡すための保持方法は、Linux 7.0 の [Scheduling Cycle](https://docs.kernel.org/7.0/scheduler/sched-ext.html#scheduling-cycle) に記載されている。
 
 </details>
-
-同じ `disabled` への復帰でも、`Ctrl+C` で止めた場合と watchdog が止めた場合では、停止理由が違う。
-状態だけでなく理由も読めれば、自作スケジューラの終了を見分けられる。

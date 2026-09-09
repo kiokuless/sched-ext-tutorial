@@ -1,21 +1,18 @@
 # 実験環境を準備する
 
-この本の実験は、スケジューラの設定を変えたときの遅延の差を数値で比較する。
-参加者ごとの CPU 数やカーネルの違いを減らすと、実験条件と観測結果を比べやすい。
-そこでこの教材では、実行環境そのものを固定し、Apple Silicon Mac 上に4 vCPUの Ubuntu VM を作り、Ubuntu 26.04 の標準カーネルを使う。
-自作スケジューラの影響を VM 内に限定できることも、この構成を使う理由である。
+実験には、Apple Silicon Mac 上に作る4 vCPUの Ubuntu VM を使う。
+Ubuntu 26.04 の標準カーネルで環境を揃え、自作スケジューラの影響を VM 内に限定する。
+参加者ごとの CPU 数やカーネルの違いを減らすことで、スケジューラの変更と観測結果を比べやすくする。
 
 ## Multipass をインストールする
 
-macOS では Homebrew から Multipass を導入できる。
-Multipass はコマンド一つで Ubuntu VM を作成し、操作できるツールで、この本では VM の作成とシェル接続に使う。
+VM の作成とシェル接続には **Multipass** を使う。
+macOS の端末で、Homebrew から Multipass 1.16.3以降を導入する。
 
 ```console
 brew install --cask multipass
 multipass version
 ```
-
-Multipass 1.16.3以降を使う。
 
 ## リポジトリを取得する
 
@@ -34,27 +31,29 @@ make vm-up
 make vm-bootstrap
 ```
 
-`vm-bootstrap` は必要なパッケージと crate 依存関係を導入する。
-完了した時点で、VM はすべての scheduler をビルドできる状態になる。
+`vm-bootstrap` は、教材のスケジューラをビルドするためのパッケージと crate 依存関係を導入する。
 初回は依存関係の取得に時間がかかるため、ハンズオン当日までにこの章を済ませておくことが望ましい。
 
 ## 前提を検査する
 
-環境を固定したつもりでも、想定と違う状態で VM が立っていることはある。
-そこで `make doctor` が、後続の実験に必要な前提を一括で検査する。
+`make doctor` で、VM が実験に必要な条件を満たしているかを検査する。
 
 ```console
 make doctor
 ```
 
-検査対象は、CPU アーキテクチャ、vCPU 数、`CONFIG_SCHED_CLASS_EXT`、BTF、clang、cargo、bpftool、perf、`sched_ext` である。
-このうち `CONFIG_SCHED_CLASS_EXT` は、カーネルに `sched_ext` が組み込まれているかを示す設定であり、無効なカーネルではそもそも scheduler をロードできない。
-BTF はカーネル内部の型情報で、BPF プログラムがカーネルの構造体を安全に参照するために必要になる。
-clang と cargo は scheduler のビルドに、bpftool と perf は観測に使う。
-自分の出力で、`fail` が付いた項目があるかを探す。
-すべての検査を通れば、次のスケジューラを動かす準備が整っている。
-`fail` があれば、ビルドやロード、測定のどこかで必要な条件が欠けている。
-[トラブルシューティング](../appendix/troubleshooting.md)で原因を確認してから進む。
+すべての項目が検査を通ることを確認する。
+`fail` があれば、ビルドやロード、測定に必要な条件が欠けているため、[トラブルシューティング](../appendix/troubleshooting.md)で原因を確認してから進む。
+
+検査対象と用途は次のとおりである。
+
+| 検査対象 | 実験で必要な理由 |
+|---|---|
+| CPU アーキテクチャ、vCPU 数 | 教材の実行条件と揃える |
+| `CONFIG_SCHED_CLASS_EXT`、`sched_ext` | カーネルに `sched_ext` が組み込まれている必要がある。無効なカーネルではスケジューラをロードできない |
+| **BTF** | カーネル内部の型情報。BPF プログラムがカーネルの構造体を安全に参照するために使う |
+| clang、cargo | スケジューラをビルドする |
+| bpftool、perf | スケジューラやタスクの動作を観測する |
 
 VM のシェルへ入る場合は、次のコマンドを使う。
 
