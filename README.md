@@ -3,9 +3,8 @@
 Linux の `sched_ext` を使い、BPF で小さな CPU scheduler を作るハンズオン教材である。
 長いタイムスライスで周期タスクを意図的に遅らせ、スライスを短くしたときの遅延とコンテキストスイッチ数を比較する。
 
-最初のスケジューラを起動して終了するところから始め、一行の変更、PID の偶奇による待ち行列の振り分け、CPU 時間の配分の比較へ進む。
+最初のスケジューラを起動して終了するところから始め、スライスの変更とコードの読解を経て、2つの課題へ取り組んでもらう。
 各変更の前に、図やコードから結果を一つ予想し、直後の説明や実行結果で確かめる構成としている。
-最後は進捗バーを見ながら、A を B の約2倍の速さで進める課題と、A の人数が増えても B の速さを保つ課題に取り組む。
 
 教材は Apple Silicon Mac と4 vCPUの Multipass VM を正式な実行環境とする。
 本文のソースは `src/`、編集する scheduler は `lab/`、動作する各段階は `checkpoints/` に置いている。
@@ -42,20 +41,20 @@ make run STEP=01 MODE=partial
 
 詳しい手順は[実験環境を準備する](src/handson/environment.md)から始める。
 
+名前付きの二つの計算プロセスを動かす課題は、[A を B の2倍の速さで進める](src/handson/race.md)にある。
+どちらも同じ量の計算を行い、名前、PID、進捗と毎秒の速度を表示する。
+
+```console
+make race STEP=03
+# lab のスケジューラを変更してから再実行
+make race STEP=lab
+```
+
 偶数 PID の三つと奇数 PID の一つを CPU 0 で動かし、単一 FIFO と二つの DSQ の配分を比較する実験は、スケジューラを停止した状態から実行する。
 
 ```console
 make bench CASE=dsq STEP=03
 make bench CASE=dsq STEP=04
-```
-
-名前付きの二つの計算プロセスを動かす課題は、[A を B の2倍の速さで進める](src/handson/race.md)にある。
-どちらも同じ量の計算を行い、名前、PID、進捗と毎秒の速度を表示する。
-
-```console
-make race STEP=04
-# lab のスケジューラを変更してから再実行
-make race STEP=lab
 ```
 
 共有 DSQ を使う課題は、[A が増えても B の速さを保つ](src/handson/team-race.md)にある。

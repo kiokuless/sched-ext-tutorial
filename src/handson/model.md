@@ -76,7 +76,7 @@ s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 前章の `taskset -c 0` は、この場合に当たる。[^cpu-selection]
 
 `is_idle` は、選ばれた CPU が空いている状態（**idle**）かどうかを受け取る変数だが、今のコードではその値を使っていない。
-次章の[偶数用と奇数用に振り分ける](./shared-dsq.md#oreore_enqueue-で偶数用と奇数用に振り分ける)でも、この関数は CPU の候補を返す役割のまま使う。
+後の[偶数用と奇数用に振り分ける](./shared-dsq.md#oreore_enqueue-で偶数用と奇数用に振り分ける)でも、この関数は CPU の候補を返す役割のまま使う。
 タスクを分類する処理は、後から呼ばれる `enqueue` に加える。
 今は「`oreore_select_cpu` はカーネルから呼ばれる関数で、CPU 選びを既定の処理に任せ、その番号を返す」と押さえておけばよい。
 
