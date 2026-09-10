@@ -14,16 +14,6 @@
 - [A が増えても B の速さを保つ](./handson/team-race.md)
 - [次の方針を選ぶ](./handson/conclusion.md)
 
-# 発展編
-
-- [VM 全体へ広げる](./advanced/system-wide.md)
-- [壊して、戻る](./advanced/watchdog.md)
-- [`sched_ext_ops` の使いどころ](./advanced/ops.md)
-- [CPU ごとの DSQ](./advanced/per-cpu-dsq.md)
-- [tail latency の測り方](./advanced/tail-latency.md)
-- [Rust で方針を書く](./advanced/rustland.md)
-- [実機で評価する](./advanced/bare-metal.md)
-
 # 付録
 
 - [用語集](./appendix/glossary.md)
