@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1260" viewBox="0 0 1280 1260" role="img" aria-labelledby="title desc">
+  <title id="title">偶数用と奇数用 DSQ を使うタスクの循環</title>
+  <desc id="desc">四つの単一スレッドのプロセスを偶奇で分類する例。init が DSQ 0 と DSQ 1 を作成する。待機から復帰したタスクは select_cpu を経て、enqueue が偶数 PID を DSQ 0、奇数 PID を DSQ 1 に入れる。CPU 1 のローカル DSQ とグローバル DSQ が空なら dispatch が呼ばれる。今回は偶数用からタスク A を移し、次は奇数用から試す。順番は CPU ごとに持ち、取り出せなければもう一方を試す。スライスを使い切って交代しても実行可能なら、select_cpu を通らず enqueue で同じ偶奇の列へ戻る。</desc>
+  <!-- SPDX-License-Identifier: CC-BY-4.0 -->
+  <!-- Source: https://github.com/torvalds/linux/blob/v7.0/Documentation/scheduler/sched-ext.rst -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#526575"/></marker>
+    <marker id="teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#087f75"/></marker>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#1761a0"/></marker>
+  </defs>
+  <rect width="1280" height="1260" rx="16" fill="#fff"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" fill="#172b3a">
+    <text x="56" y="54" font-size="30" font-weight="700">偶数用と奇数用 DSQ を使うタスクの循環</text>
+    <text x="56" y="87" font-size="19" fill="#526575">A〜D は単一スレッドのプロセス。タスク A の実行と再投入を追う。</text>
+    <rect x="858" y="28" width="366" height="72" rx="10" fill="#e7f1fc" stroke="#1761a0" stroke-dasharray="5 4"/>
+    <text x="1041" y="57" text-anchor="middle" font-size="22" font-weight="600">oreore_init</text>
+    <text x="1041" y="84" text-anchor="middle" font-size="18" fill="#526575">初期化時に DSQ 0 と 1 を作成</text>
+
+    <!-- Wakeup is an entry into the cycle, not part of every re-enqueue. -->
+    <text x="60" y="131" font-size="17" fill="#526575">待機から復帰したとき</text>
+    <rect x="60" y="148" width="240" height="76" rx="10" fill="#eef2f5" stroke="#a9bbc6" stroke-width="1.5"/>
+    <text x="180" y="180" text-anchor="middle" font-size="21" font-weight="600">待機から復帰</text>
+    <text x="180" y="208" text-anchor="middle" font-size="18" fill="#526575">wakeup</text>
+    <path d="M 302 186 H 356" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="360" y="148" width="300" height="76" rx="10" fill="#e7f1fc" stroke="#1761a0" stroke-width="1.5"/>
+    <text x="510" y="180" text-anchor="middle" font-size="22" font-weight="600">oreore_select_cpu</text>
+    <text x="510" y="208" text-anchor="middle" font-size="18" fill="#526575">CPU の候補を返す</text>
+    <path d="M 662 186 H 896" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="900" y="148" width="245" height="76" rx="10" fill="#e7f1fc" stroke="#1761a0" stroke-width="1.5"/>
+    <text x="1022.5" y="180" text-anchor="middle" font-size="22" font-weight="600">oreore_enqueue</text>
+    <text x="1022.5" y="208" text-anchor="middle" font-size="18" fill="#526575">PID の偶奇で分ける</text>
+
+    <!-- Shared custom FIFO: creation is separate from task insertion. -->
+    <text x="260" y="278" font-size="25" font-weight="700">偶数用の共有 DSQ</text>
+    <text x="515" y="278" font-size="18" fill="#526575">EVEN_DSQ = 0</text>
+    <text x="260" y="310" font-size="17" fill="#526575">取り出し側（先頭）</text>
+    <text x="980" y="310" text-anchor="end" font-size="17" fill="#526575">投入側（末尾）</text>
+    <rect x="260" y="328" width="720" height="88" rx="10" fill="#f6f8fa" stroke="#a9bbc6" stroke-width="1.5"/>
+    <rect x="260" y="328" width="180" height="88" rx="10" fill="#e3f5f0" stroke="#087f75" stroke-width="2"/>
+    <path d="M 440 328 V 416 M 620 328 V 416 M 800 328 V 416" stroke="#a9bbc6" stroke-width="1.5"/>
+    <text x="350" y="365" text-anchor="middle" font-size="24" font-weight="700" fill="#087f75">タスク A</text>
+    <text x="350" y="398" text-anchor="middle" font-size="18" fill="#087f75">PID 100</text>
+    <text x="530" y="365" text-anchor="middle" font-size="24">タスク B</text>
+    <text x="530" y="398" text-anchor="middle" font-size="18" fill="#526575">PID 102</text>
+    <text x="710" y="365" text-anchor="middle" font-size="24">タスク C</text>
+    <text x="710" y="398" text-anchor="middle" font-size="18" fill="#526575">PID 104</text>
+    <path d="M 1022.5 226 V 352 Q 1022.5 372 1002.5 372 H 984" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <text x="1036" y="322" font-size="17" fill="#526575">偶数</text>
+
+    <text x="260" y="455" font-size="25" font-weight="700">奇数用の共有 DSQ</text>
+    <text x="515" y="455" font-size="18" fill="#526575">ODD_DSQ = 1</text>
+    <rect x="260" y="478" width="720" height="88" rx="10" fill="#f6f8fa" stroke="#a9bbc6" stroke-width="1.5"/>
+    <rect x="260" y="478" width="180" height="88" rx="10" fill="#fff0d7" stroke="#a25c12" stroke-width="1.5"/>
+    <text x="350" y="515" text-anchor="middle" font-size="24">タスク D</text>
+    <text x="350" y="548" text-anchor="middle" font-size="18" fill="#526575">PID 101</text>
+    <path d="M 1022.5 244 H 1080 Q 1100 244 1100 264 V 502 Q 1100 522 1080 522 H 984" fill="none" stroke="#526575" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <text x="1113" y="478" font-size="17" fill="#526575">奇数</text>
+
+    <!-- The custom dispatch callback moves a task into the calling CPU's local DSQ. -->
+    <path d="M 257 372 H 120 Q 100 372 100 392 V 708 Q 100 728 120 728 H 326" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+    <path d="M 257 522 H 165 Q 145 522 145 542 V 678 Q 145 698 165 698 H 326" fill="none" stroke="#526575" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+    <text x="180" y="610" font-size="23" font-weight="700" fill="#087f75">① 今回は偶数用からタスク A を取り出す</text>
+    <text x="180" y="640" font-size="19" fill="#526575">CPU 1 のローカル DSQ とグローバル DSQ が空で、タスク A を実行できる場合</text>
+    <rect x="330" y="676" width="330" height="84" rx="10" fill="#e7f1fc" stroke="#1761a0" stroke-width="1.5"/>
+    <text x="495" y="708" text-anchor="middle" font-size="22" font-weight="600">oreore_dispatch</text>
+    <text x="495" y="738" text-anchor="middle" font-size="18" fill="#526575">DSQ 0 → 1 → 0 → 1 と選ぶ</text>
+    <text x="700" y="706" font-size="19" fill="#526575">次は奇数用から試すと記録する</text>
+    <text x="700" y="736" font-size="19" fill="#526575">取り出せなければ、もう一方を試す</text>
+
+    <!-- Other CPUs have their own local DSQs. -->
+    <rect x="170" y="806" width="870" height="211" rx="14" fill="#fafcfd" stroke="#d8e2e8" stroke-width="1.5"/>
+    <path d="M 495 762 V 819" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+
+    <g text-anchor="middle" transform="translate(0 260)">
+      <rect x="200" y="563" width="170" height="56" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="285" y="598" font-size="19">ローカル DSQ</text>
+      <path d="M 285 621 V 647" fill="none" stroke="#a9bbc6" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="200" y="651" width="170" height="88" rx="10" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="285" y="704" font-size="25" font-weight="600">CPU 0</text>
+
+      <rect x="410" y="563" width="170" height="56" rx="9" fill="#e3f5f0" stroke="#087f75" stroke-width="2"/>
+      <text x="495" y="598" font-size="19" fill="#087f75">ローカル DSQ</text>
+      <path d="M 495 621 V 647" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+      <rect x="410" y="651" width="170" height="88" rx="10" fill="#e3f5f0" stroke="#087f75" stroke-width="2"/>
+      <text x="495" y="688" font-size="25" font-weight="700" fill="#087f75">CPU 1</text>
+      <text x="495" y="718" font-size="18" fill="#087f75">タスク A を実行</text>
+
+      <rect x="620" y="563" width="170" height="56" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="705" y="598" font-size="19">ローカル DSQ</text>
+      <path d="M 705 621 V 647" fill="none" stroke="#a9bbc6" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="620" y="651" width="170" height="88" rx="10" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="705" y="704" font-size="25" font-weight="600">CPU 2</text>
+
+      <rect x="830" y="563" width="170" height="56" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="915" y="598" font-size="19">ローカル DSQ</text>
+      <path d="M 915 621 V 647" fill="none" stroke="#a9bbc6" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="830" y="651" width="170" height="88" rx="10" fill="#eef2f5" stroke="#a9bbc6"/>
+      <text x="915" y="704" font-size="25" font-weight="600">CPU 3</text>
+    </g>
+
+    <!-- Runnable after slice exhaustion: enqueue again, without select_cpu. -->
+    <path d="M 495 1001 V 1090 Q 495 1110 515 1110 H 1180 Q 1200 1110 1200 1090 V 206 Q 1200 186 1180 186 H 1149" fill="none" stroke="#087f75" stroke-width="3.5" marker-end="url(#teal-arrow)"/>
+    <text x="530" y="1051" font-size="23" font-weight="700" fill="#087f75">② スライスを使い切って交代</text>
+    <text x="530" y="1080" font-size="19" fill="#526575">タスク A は引き続き実行可能</text>
+    <text x="645" y="1153" font-size="23" font-weight="700" fill="#087f75">③ enqueue で偶数用 DSQ へ戻す</text>
+    <text x="645" y="1184" font-size="19" fill="#526575">PID は変わらず、select_cpu を呼ばない</text>
+
+    <path d="M 56 1210 H 1224" stroke="#d8e2e8"/>
+    <text x="56" y="1240" font-size="18" fill="#526575">二つの DSQ は CPU 間で共有する。取り出す順番は CPU ごとに記録し、実行先は固定しない。</text>
+  </g>
+</svg>

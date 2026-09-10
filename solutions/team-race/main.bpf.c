@@ -9,38 +9,62 @@
 
 char _license[] SEC("license") = "GPL";
 
-const volatile u64 slice_ns = 20000000ULL;  /* 20 ms, kernel default */
+const volatile u64 slice_ns = 10000000ULL;  /* 10 milliseconds */
 
 UEI_DEFINE(uei);
 
-#define SHARED_DSQ 0
+#define TEAM_A_DSQ 0
+#define TEAM_B_DSQ 1
+
+/* Each CPU remembers which shared DSQ to try first next time. */
+struct {
+	__uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+	__uint(max_entries, 1);
+	__type(key, u32);
+	__type(value, u32);
+} dispatch_turn SEC(".maps");
 
 s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 		   u64 wake_flags)
 {
 	bool is_idle = false;
-	s32 cpu;
 
-	cpu = scx_bpf_select_cpu_dfl(p, prev_cpu, wake_flags, &is_idle);
-	if (is_idle)
-		scx_bpf_dsq_insert(p, SCX_DSQ_LOCAL, slice_ns, 0);
-
-	return cpu;
+	return scx_bpf_select_cpu_dfl(p, prev_cpu, wake_flags, &is_idle);
 }
 
 void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
 {
-	scx_bpf_dsq_insert(p, SHARED_DSQ, slice_ns, enq_flags);
+	u64 dsq = bpf_strncmp(p->comm, 6, "team_a") == 0 ? TEAM_A_DSQ : TEAM_B_DSQ;
+
+	scx_bpf_dsq_insert(p, dsq, slice_ns, enq_flags);
 }
 
 void BPF_STRUCT_OPS(oreore_dispatch, s32 cpu, struct task_struct *prev)
 {
-	scx_bpf_dsq_move_to_local(SHARED_DSQ, 0);
+	u32 key = 0;
+	u32 *turn = bpf_map_lookup_elem(&dispatch_turn, &key);
+	u64 dsq;
+
+	if (!turn)
+		return;
+
+	dsq = *turn;
+	if (!scx_bpf_dsq_move_to_local(dsq, 0)) {
+		dsq ^= 1;
+		if (!scx_bpf_dsq_move_to_local(dsq, 0))
+			return;
+	}
+	*turn = dsq ^ 1;
 }
 
 s32 BPF_STRUCT_OPS_SLEEPABLE(oreore_init)
 {
-	return scx_bpf_create_dsq(SHARED_DSQ, -1);
+	s32 err;
+
+	err = scx_bpf_create_dsq(TEAM_A_DSQ, -1);
+	if (err)
+		return err;
+	return scx_bpf_create_dsq(TEAM_B_DSQ, -1);
 }
 
 void BPF_STRUCT_OPS(oreore_exit, struct scx_exit_info *ei)

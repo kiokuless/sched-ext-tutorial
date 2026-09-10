@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="680" viewBox="0 0 760 680" role="img" aria-labelledby="title desc">
+  <title id="title">一つの FIFO と偶奇で分けた二つの DSQ</title>
+  <desc id="desc">四つの単一スレッドのプロセスのうち、A、B、C の PID は偶数、D は奇数。一つの FIFO では A、B、C、D に順番が回る。偶数用と奇数用の列を交互に選ぶと、A、D、B、D、C、D と回る。全員が同じスライスを使い切り、一つの CPU で動く場合の例。</desc>
+  <!-- SPDX-License-Identifier: CC-BY-4.0 -->
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#526575"/></marker></defs>
+  <rect width="760" height="680" rx="14" fill="#fff"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" fill="#172b3a">
+    <text x="28" y="38" font-size="23" font-weight="700">列を分けると、順番の回り方が変わる</text>
+    <text x="28" y="68" font-size="16" fill="#526575">同じ四つのプロセス / CPU は一つ / 全員が同じスライスを使い切る</text>
+    <path d="M 380 94 V 650" stroke="#d8e0e5"/>
+    <text x="196" y="113" text-anchor="middle" font-size="21" font-weight="600" fill="#172b3a">一つの FIFO</text>
+    <text x="566" y="113" text-anchor="middle" font-size="21" font-weight="600" fill="#172b3a">偶数用と奇数用に分ける</text>
+    <text x="196" y="152" text-anchor="middle" font-size="18" font-weight="400" fill="#172b3a">グローバル DSQ</text>
+    <text x="483" y="152" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">偶数用 DSQ 0</text>
+    <text x="645" y="152" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">奇数用 DSQ 1</text>
+    <rect x="104" y="171" width="184" height="260" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+    <rect x="414" y="171" width="138" height="260" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+    <rect x="576" y="171" width="138" height="260" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+    <rect x="120" y="188" width="152" height="42" rx="9" fill="#fff0d7" stroke="#a25c12"/>
+    <text x="196" y="216" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">D（PID 101）</text>
+    <rect x="120" y="246" width="152" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+    <text x="196" y="274" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">C（PID 104）</text>
+    <rect x="120" y="304" width="152" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+    <text x="196" y="332" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">B（PID 102）</text>
+    <rect x="120" y="362" width="152" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+    <text x="196" y="390" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">A（PID 100）</text>
+    <rect x="430" y="246" width="106" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+    <text x="483" y="274" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">C（104）</text>
+    <rect x="430" y="304" width="106" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+    <text x="483" y="332" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">B（102）</text>
+    <rect x="430" y="362" width="106" height="42" rx="9" fill="#e3f5f0" stroke="#087f75"/>
+    <text x="483" y="390" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">A（100）</text>
+    <rect x="592" y="362" width="106" height="42" rx="9" fill="#fff0d7" stroke="#a25c12"/>
+    <text x="645" y="390" text-anchor="middle" font-size="17" font-weight="400" fill="#172b3a">D（101）</text>
+    <text x="196" y="424" text-anchor="middle" font-size="14" font-weight="400" fill="#526575">先頭</text>
+    <text x="483" y="424" text-anchor="middle" font-size="14" font-weight="400" fill="#526575">先頭</text>
+    <text x="645" y="424" text-anchor="middle" font-size="14" font-weight="400" fill="#526575">先頭</text>
+    <path d="M 196 431 V 476" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M 483 431 V 476" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M 645 431 V 476" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="44" y="482" width="304" height="62" rx="9" fill="#eef2f5" stroke="#a9bbc6"/>
+    <text x="196" y="509" text-anchor="middle" font-size="18" font-weight="600" fill="#172b3a">FIFO の先頭を選ぶ</text>
+    <text x="196" y="532" text-anchor="middle" font-size="16" font-weight="400" fill="#526575">四つで順番を分け合う</text>
+    <rect x="400" y="482" width="332" height="62" rx="9" fill="#e7f1fc" stroke="#1761a0"/>
+    <text x="566" y="509" text-anchor="middle" font-size="18" font-weight="600" fill="#172b3a">二つの列を交互に選ぶ</text>
+    <text x="566" y="532" text-anchor="middle" font-size="16" font-weight="400" fill="#526575">偶数側は三つ、奇数側は一つ</text>
+    <text x="196" y="581" text-anchor="middle" font-size="23" font-weight="600" fill="#172b3a">A → B → C → D</text>
+    <text x="566" y="581" text-anchor="middle" font-size="21" font-weight="600" fill="#172b3a">A → D → B → D → C → D</text>
+    <text x="196" y="625" text-anchor="middle" font-size="17" font-weight="400" fill="#526575">どのプロセスも四回に一回</text>
+    <text x="566" y="625" text-anchor="middle" font-size="17" font-weight="400" fill="#526575">D には二回に一回、順番が回る</text>
+  </g>
+</svg>

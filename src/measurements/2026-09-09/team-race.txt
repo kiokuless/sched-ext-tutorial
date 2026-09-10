@@ -1,0 +1,150 @@
+Measured: 2026-09-09 JST
+Environment: tutorial VM, Ubuntu 26.04, Linux 7.0.0-30-generic, 4 vCPU, aarch64
+Affinity: all single-threaded workers pinned to CPU 1; partial mode
+The experiment used CPU 1 and did not modify unrelated user workloads.
+Driver: scripts/guest/team_race_experiment.py
+Workload: tools/workload/src/race.rs (existing race-worker)
+
+A1 and B1 start first. Additional A workers are spawned after about 5 seconds.
+The experiment observes about 8 seconds after all newcomers start, then stops
+all workers with unfinished work. Each rate window omits its first second.
+All tasks get 10 ms slices in both schedulers. Work totals are calibrated for
+each run; compare B1's before/after rates within each run, not percentages
+or absolute rates between runs. The output below contains excerpts: setup,
+arrival, the final progress snapshot, and the summary from each run.
+
+Baseline command (Mac host):
+make team-race STEP=03 RACE_CPU=1
+
+Solution validation: copy STEP=04 into target/team-race-validation/solution,
+replace only src/bpf/main.bpf.c with solutions/team-race/main.bpf.c, then build
+inside the VM with clang-19 and the same locked dependencies. Lab was not edited.
+
+Build command (inside VM):
+BPF_CLANG=clang-19 CARGO_INCREMENTAL=0 \
+CARGO_TARGET_DIR=/var/cache/sched-ext-tutorial/target/race-weighted \
+cargo build --release --locked --offline \
+  --manifest-path target/team-race-validation/solution/Cargo.toml
+
+The directory named race-weighted was reused as a Cargo build cache; the
+binary in these runs was built from the team-race solution above.
+Run command (inside VM, as root; N = 3, 5, 7):
+python3 -B scripts/guest/team_race_experiment.py \
+  --scheduler /var/cache/sched-ext-tutorial/target/race-weighted/release/scx_oreore \
+  --cpu 1 --a-members N
+Solution SHA-256: 23ac4ae6ab02aa127bf887d3912b114811d0cf2e50d3db2d4879bfde8da9547e
+
+[baseline-3]
+kernel=7.0.0-30-generic scheduler=/var/cache/sched-ext-tutorial/target/scx-step-03/release/scx_oreore
+same_work=227940 units each; CPU=1; mode=partial
+A_members=1->3; add_after=5s; observe_after=8s; Ctrl+C stops this experiment.
+ready: name=team_a1 PID=219237 CPU=1
+ready: name=team_b1 PID=219238 CPU=1
+Adding team_a2, team_a3 at 5.0s
+ready: name=team_a2 PID=219239 CPU=1
+ready: name=team_a3 PID=219240 CPU=1
+elapsed= 13.2s  A: 3 members / B: 1 member
+team_a1 PID=219237  CPU=1 [###---------------------]  15.1%    0.8%/s
+team_b1 PID=219238  CPU=1 [###---------------------]  15.2%    0.8%/s
+team_a2 PID=219239  CPU=1 [#-----------------------]   6.7%    0.8%/s
+team_a3 PID=219240  CPU=1 [#-----------------------]   6.8%    0.8%/s
+
+Rates from completed work (startup and arrival boundaries excluded):
+before: A_total=3784.1 units/s B1=3786.9 units/s
+after: A_total=5667.0 units/s B1=1896.8 units/s
+B_after/B_before=0.50x  A_members=1->3
+Measurement complete. Stopping all workers with unfinished work.
+scx_oreore started (mode=partial, slice=10000 us)
+EXIT: unregistered from user space
+scheduler_state_after=disabled
+
+[solution-3]
+kernel=7.0.0-30-generic scheduler=/var/cache/sched-ext-tutorial/target/race-weighted/release/scx_oreore
+same_work=244740 units each; CPU=1; mode=partial
+A_members=1->3; add_after=5s; observe_after=8s; Ctrl+C stops this experiment.
+ready: name=team_a1 PID=219309 CPU=1
+ready: name=team_b1 PID=219310 CPU=1
+Adding team_a2, team_a3 at 5.0s
+ready: name=team_a2 PID=219311 CPU=1
+ready: name=team_a3 PID=219312 CPU=1
+elapsed= 13.2s  A: 3 members / B: 1 member
+team_a1 PID=219309  CPU=1 [##----------------------]  12.2%    0.5%/s
+team_b1 PID=219310  CPU=1 [####--------------------]  20.4%    1.5%/s
+team_a2 PID=219311  CPU=1 [#-----------------------]   4.2%    0.5%/s
+team_a3 PID=219312  CPU=1 [#-----------------------]   4.2%    0.5%/s
+
+Rates from completed work (startup and arrival boundaries excluded):
+before: A_total=3792.7 units/s B1=3788.0 units/s
+after: A_total=3783.8 units/s B1=3786.9 units/s
+B_after/B_before=1.00x  A_members=1->3
+Measurement complete. Stopping all workers with unfinished work.
+scx_oreore started (mode=partial, slice=10000 us)
+EXIT: unregistered from user space
+scheduler_state_after=disabled
+
+[solution-5]
+kernel=7.0.0-30-generic scheduler=/var/cache/sched-ext-tutorial/target/race-weighted/release/scx_oreore
+same_work=247260 units each; CPU=1; mode=partial
+A_members=1->5; add_after=5s; observe_after=8s; Ctrl+C stops this experiment.
+ready: name=team_a1 PID=219377 CPU=1
+ready: name=team_b1 PID=219378 CPU=1
+Adding team_a2, team_a3, team_a4, team_a5 at 5.1s
+ready: name=team_a2 PID=219379 CPU=1
+ready: name=team_a3 PID=219380 CPU=1
+ready: name=team_a4 PID=219381 CPU=1
+ready: name=team_a5 PID=219382 CPU=1
+elapsed= 13.3s  A: 5 members / B: 1 member
+team_a1 PID=219377  CPU=1 [##----------------------]  10.3%    0.3%/s
+team_b1 PID=219378  CPU=1 [####--------------------]  20.1%    1.3%/s
+team_a2 PID=219379  CPU=1 [------------------------]   2.5%    0.3%/s
+team_a3 PID=219380  CPU=1 [------------------------]   2.5%    0.2%/s
+team_a4 PID=219381  CPU=1 [------------------------]   2.5%    0.3%/s
+team_a5 PID=219382  CPU=1 [------------------------]   2.5%    0.2%/s
+
+Rates from completed work (startup and arrival boundaries excluded):
+before: A_total=3774.3 units/s B1=3774.5 units/s
+after: A_total=3738.6 units/s B1=3734.5 units/s
+B_after/B_before=0.99x  A_members=1->5
+Measurement complete. Stopping all workers with unfinished work.
+scx_oreore started (mode=partial, slice=10000 us)
+EXIT: unregistered from user space
+scheduler_state_after=disabled
+
+[solution-7]
+kernel=7.0.0-30-generic scheduler=/var/cache/sched-ext-tutorial/target/race-weighted/release/scx_oreore
+same_work=239220 units each; CPU=1; mode=partial
+A_members=1->7; add_after=5s; observe_after=8s; Ctrl+C stops this experiment.
+ready: name=team_a1 PID=219455 CPU=1
+ready: name=team_b1 PID=219456 CPU=1
+Adding team_a2, team_a3, team_a4, team_a5, team_a6, team_a7 at 5.1s
+ready: name=team_a2 PID=219457 CPU=1
+ready: name=team_a3 PID=219458 CPU=1
+ready: name=team_a4 PID=219459 CPU=1
+ready: name=team_a5 PID=219460 CPU=1
+ready: name=team_a6 PID=219461 CPU=1
+ready: name=team_a7 PID=219462 CPU=1
+elapsed= 13.4s  A: 7 members / B: 1 member
+team_a1 PID=219455  CPU=1 [##----------------------]  10.0%    0.2%/s
+team_b1 PID=219456  CPU=1 [#####-------------------]  20.9%    1.6%/s
+team_a2 PID=219457  CPU=1 [------------------------]   1.9%    0.2%/s
+team_a3 PID=219458  CPU=1 [------------------------]   1.9%    0.2%/s
+team_a4 PID=219459  CPU=1 [------------------------]   1.9%    0.2%/s
+team_a5 PID=219460  CPU=1 [------------------------]   1.9%    0.2%/s
+team_a6 PID=219461  CPU=1 [------------------------]   1.9%    0.2%/s
+team_a7 PID=219462  CPU=1 [------------------------]   1.9%    0.2%/s
+
+Rates from completed work (startup and arrival boundaries excluded):
+before: A_total=3774.1 units/s B1=3766.0 units/s
+after: A_total=3788.4 units/s B1=3782.1 units/s
+B_after/B_before=1.00x  A_members=1->7
+Measurement complete. Stopping all workers with unfinished work.
+scx_oreore started (mode=partial, slice=10000 us)
+EXIT: unregistered from user space
+scheduler_state_after=disabled
+
+[Lifecycle checks]
+interrupt_cleanup_after_2_workers=passed
+interrupt_cleanup_after_4_workers=passed
+watchdog_failure_cleanup=passed
+names_affinity_and_sched_ext=passed
+scheduler_state_after=disabled

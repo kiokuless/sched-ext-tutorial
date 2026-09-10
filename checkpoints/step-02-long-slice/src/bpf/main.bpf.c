@@ -13,34 +13,17 @@ const volatile u64 slice_ns = 2000000000ULL;  /* 2 seconds */
 
 UEI_DEFINE(uei);
 
-#define SHARED_DSQ 0
-
 s32 BPF_STRUCT_OPS(oreore_select_cpu, struct task_struct *p, s32 prev_cpu,
 		   u64 wake_flags)
 {
 	bool is_idle = false;
-	s32 cpu;
 
-	cpu = scx_bpf_select_cpu_dfl(p, prev_cpu, wake_flags, &is_idle);
-	if (is_idle)
-		scx_bpf_dsq_insert(p, SCX_DSQ_LOCAL, slice_ns, 0);
-
-	return cpu;
+	return scx_bpf_select_cpu_dfl(p, prev_cpu, wake_flags, &is_idle);
 }
 
 void BPF_STRUCT_OPS(oreore_enqueue, struct task_struct *p, u64 enq_flags)
 {
-	scx_bpf_dsq_insert(p, SHARED_DSQ, slice_ns, enq_flags);
-}
-
-void BPF_STRUCT_OPS(oreore_dispatch, s32 cpu, struct task_struct *prev)
-{
-	scx_bpf_dsq_move_to_local(SHARED_DSQ, 0);
-}
-
-s32 BPF_STRUCT_OPS_SLEEPABLE(oreore_init)
-{
-	return scx_bpf_create_dsq(SHARED_DSQ, -1);
+	scx_bpf_dsq_insert(p, SCX_DSQ_GLOBAL, slice_ns, enq_flags);
 }
 
 void BPF_STRUCT_OPS(oreore_exit, struct scx_exit_info *ei)
@@ -51,8 +34,7 @@ void BPF_STRUCT_OPS(oreore_exit, struct scx_exit_info *ei)
 SCX_OPS_DEFINE(oreore_ops,
 	       .select_cpu = (void *)oreore_select_cpu,
 	       .enqueue    = (void *)oreore_enqueue,
-	       .dispatch   = (void *)oreore_dispatch,
-	       .init       = (void *)oreore_init,
 	       .exit       = (void *)oreore_exit,
 	       .timeout_ms = 5000,
 	       .name       = "oreore");
+

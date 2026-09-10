@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="680" viewBox="0 0 760 680" role="img" aria-labelledby="title desc">
 <title id="title">共有 DSQ を通る経路と直接投入</title>
-<desc id="desc">step 02 の経路。select_cpu が idle CPU を見つけた場合は、戻り値の CPU のローカル DSQ に直接投入して enqueue を省略する。見つからなければ enqueue が共有 DSQ に入れ、仕事を求めた CPU の dispatch がローカル DSQ に移す。図の CPU 0 は選ばれた CPU の例。</desc>
+<desc id="desc">step 04 の経路。select_cpu が idle CPU を見つけた場合は、戻り値の CPU のローカル DSQ に直接投入して enqueue を省略する。見つからなければ enqueue が共有 DSQ に入れ、仕事を求めた CPU の dispatch がローカル DSQ に移す。図の CPU 0 は選ばれた CPU の例。</desc>
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <defs>
   <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker>

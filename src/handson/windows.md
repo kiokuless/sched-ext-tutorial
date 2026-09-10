@@ -149,7 +149,7 @@ cat /sys/kernel/sched_ext/root/ops
 
 ## 測定ログを残す
 
-本文の `mkdir`、パイプ、`tee` も MSYS2 で使える。
+`mkdir`、パイプ、`tee` も MSYS2 で使える。
 標準出力を Windows ホストで保存するので、ログを VM から転送する手順は不要である。
 
 ```bash
@@ -158,16 +158,17 @@ set -o pipefail
 make bench CASE=fair 2>&1 | tee target/measurements/fair.log
 ```
 
-長いスライスの実験は、本文に従って `lab` を編集した後に実行する。
+本文の sleep の手動実験とは別に、`make bench` でスライスの長さを比較した記録も残せる。
+長いスライスの完成例は `STEP=02`、短いスライスの完成例は `STEP=03` である。
 
 ```bash
-make bench CASE=step STEP=lab 2>&1 | tee target/measurements/long.log
+make bench CASE=step STEP=02 2>&1 | tee target/measurements/long.log
 ```
 
-短いスライスへ編集してから、同じコマンドで保存先だけを変える。
+短いスライスの完成例でも測り、別のファイルへ保存する。
 
 ```bash
-make bench CASE=step STEP=lab 2>&1 | tee target/measurements/short.log
+make bench CASE=step STEP=03 2>&1 | tee target/measurements/short.log
 ```
 
 これらのログは Windows 側のリポジトリの `target/measurements/` にある。

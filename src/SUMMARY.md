@@ -7,16 +7,17 @@
 - [実験環境を準備する](./handson/environment.md)
   - [Windows で実験環境を準備する](./handson/windows.md)
 - [最初のスケジューラを動かす](./handson/global.md)
-- [一行変えて動かす](./handson/model.md)
-- [自分の待ち行列から取り出す](./handson/shared-dsq.md)
 - [1秒後に戻れないタスク](./handson/long-slice.md)
-- [スライスを短くする](./handson/short-slice.md)
-- [VM 全体へ広げる](./handson/system-wide.md)
-- [壊して、戻る](./handson/watchdog.md)
+- [最初の main.bpf.c を読む](./handson/model.md)
+- [A を B の2倍の速さで進める](./handson/race.md)
+- [自分の待ち行列から取り出す](./handson/shared-dsq.md)
+- [A が増えても B の速さを保つ](./handson/team-race.md)
 - [次の方針を選ぶ](./handson/conclusion.md)
 
 # 発展編
 
+- [VM 全体へ広げる](./advanced/system-wide.md)
+- [壊して、戻る](./advanced/watchdog.md)
 - [`sched_ext_ops` の使いどころ](./advanced/ops.md)
 - [CPU ごとの DSQ](./advanced/per-cpu-dsq.md)
 - [tail latency の測り方](./advanced/tail-latency.md)

@@ -3,7 +3,7 @@
 Linux の `sched_ext` を使い、BPF で小さな CPU scheduler を作るハンズオン教材である。
 長いタイムスライスで周期タスクを意図的に遅らせ、スライスを短くしたときの遅延とコンテキストスイッチ数を比較する。
 
-最初のスケジューラを起動して終了するところから始め、一行の変更、独自の待ち行列、遅延の測定へ進む。
+最初のスケジューラを起動して終了するところから始め、スライスの変更とコードの読解を経て、2つの課題へ取り組んでもらう。
 各変更の前に、図やコードから結果を一つ予想し、直後の説明や実行結果で確かめる構成としている。
 
 教材は Apple Silicon Mac と4 vCPUの Multipass VM を正式な実行環境とする。
@@ -43,6 +43,33 @@ make run STEP=01 MODE=partial
 
 詳しい手順は[実験環境を準備する](src/handson/environment.md)から始める。
 
+名前付きの二つの計算プロセスを動かす課題は、[A を B の2倍の速さで進める](src/handson/race.md)にある。
+どちらも同じ量の計算を行い、名前、PID、進捗と毎秒の速度を表示する。
+
+```console
+make race STEP=03
+# lab のスケジューラを変更してから再実行
+make race STEP=lab
+```
+
+偶数 PID の三つと奇数 PID の一つを CPU 0 で動かし、単一 FIFO と二つの DSQ の配分を比較する実験は、スケジューラを停止した状態から実行する。
+
+```console
+make bench CASE=dsq STEP=03
+make bench CASE=dsq STEP=04
+```
+
+共有 DSQ を使う課題は、[A が増えても B の速さを保つ](src/handson/team-race.md)にある。
+A1 と B1 を動かした後に A2 と A3 を追加し、追加前後の B1 の速度を比較する。
+
+```console
+make team-race STEP=03
+# lab のスケジューラを変更してから再実行
+make team-race STEP=lab
+# A の人数を増やして同じ規則を試す
+make team-race STEP=lab TEAM_A_MEMBERS=5
+```
+
 ## 検査する
 
 ホスト側で実行できる検査は次の一つにまとめている。
@@ -61,6 +88,6 @@ make verify-checkpoints
 
 - `src/` の本文は [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) で提供する。
 - 独自のツールとスクリプトは MIT OR Apache-2.0で提供する。
-- Linux kernel のサンプルを基にした `lab/` と `checkpoints/` は GPL-2.0-only で提供する。
+- Linux kernel のサンプルを基にした `lab/`、`checkpoints/`、`solutions/` は GPL-2.0-only で提供する。
 
 由来と個別の範囲は[ライセンスと由来](src/appendix/licenses.md)に記載している。

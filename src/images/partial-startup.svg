@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="650" viewBox="0 0 760 650" role="img" aria-labelledby="title desc">
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<title id="title">partial mode で起動すると誰の担当が変わるか</title>
+<desc id="desc">起動前と partial mode の起動直後は、シェルと通常のサービスを fair class が担当する。periodic を --sched-ext 付きで実行すると、そのタスクだけが sched_ext 上の自作スケジューラに入る。両クラスとも VM の CPU を使う。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526575"/></marker></defs>
+<rect width="760" height="650" rx="14" fill="#fff"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif" font-size="17" fill="#172b3a">
+<text x="28" y="44" font-size="21" font-weight="600">1　起動前</text>
+<rect x="28" y="64" width="258" height="110" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<rect x="306" y="64" width="258" height="110" rx="8" fill="#f6f7f8" stroke="#a9bbc6"/>
+<text x="157" y="92" text-anchor="middle" fill="#526575">fair class（標準）</text>
+<text x="157" y="132" text-anchor="middle">シェル　通常のサービス</text>
+<text x="435" y="92" text-anchor="middle" fill="#1761a0">sched_ext（自作の方針）</text>
+<text x="435" y="132" text-anchor="middle">未起動</text>
+<rect x="610" y="86" width="122" height="64" rx="8" fill="#fff4df" stroke="#a97717"/>
+<text x="671" y="113" text-anchor="middle">VM の CPU</text>
+<text x="671" y="136" text-anchor="middle" font-size="14">両クラスで使う</text>
+<path d="M 157 174 V 194 H 592 V 118 H 610" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="28" y="254" font-size="21" font-weight="600">2　scx_oreore を partial mode で起動</text>
+<rect x="28" y="274" width="258" height="110" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<rect x="306" y="274" width="258" height="110" rx="8" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="157" y="302" text-anchor="middle" fill="#526575">fair class（標準）</text>
+<text x="157" y="342" text-anchor="middle">シェル　通常のサービス</text>
+<text x="435" y="302" text-anchor="middle" fill="#1761a0">sched_ext（自作の方針）</text>
+<text x="435" y="342" text-anchor="middle">有効だが対象タスクなし</text>
+<rect x="610" y="296" width="122" height="64" rx="8" fill="#fff4df" stroke="#a97717"/>
+<text x="671" y="323" text-anchor="middle">VM の CPU</text>
+<text x="671" y="346" text-anchor="middle" font-size="14">両クラスで使う</text>
+<path d="M 157 384 V 404 H 592 V 328 H 610" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="28" y="464" font-size="21" font-weight="600">3　periodic を --sched-ext 付きで実行</text>
+<rect x="28" y="484" width="258" height="110" rx="8" fill="#eef2f5" stroke="#a9bbc6"/>
+<rect x="306" y="484" width="258" height="110" rx="8" fill="#e7f1fc" stroke="#1761a0"/>
+<text x="157" y="512" text-anchor="middle" fill="#526575">fair class（標準）</text>
+<text x="157" y="552" text-anchor="middle">シェル　通常のサービス</text>
+<text x="435" y="512" text-anchor="middle" fill="#1761a0">sched_ext（自作の方針）</text>
+<text x="435" y="552" text-anchor="middle">periodic</text>
+<rect x="610" y="506" width="122" height="64" rx="8" fill="#fff4df" stroke="#a97717"/>
+<text x="671" y="533" text-anchor="middle">VM の CPU</text>
+<text x="671" y="556" text-anchor="middle" font-size="14">両クラスで使う</text>
+<path d="M 157 594 V 614 H 592 V 538 H 610" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 564 538 H 610" fill="none" stroke="#526575" stroke-width="2" marker-end="url(#arrow)"/>
+</g></svg>
