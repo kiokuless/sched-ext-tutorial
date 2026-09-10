@@ -6,11 +6,11 @@
 ## 三つの端末を用意する
 
 前章のスケジューラは `Ctrl+C` で終了しておく。
-端末1は Mac 側のリポジトリ直下に置き、端末2と端末3は、それぞれ `make vm-shell` で VM に入る。
+端末1はホスト側のリポジトリ直下に置き、端末2と端末3は、それぞれ `make vm-shell` で VM に入る。
 
 | 端末 | 場所 | 動かすもの |
 |---|---|---|
-| 端末1 | Mac | 自作スケジューラ |
+| 端末1 | ホスト | 自作スケジューラ |
 | 端末2 | VM | 計算を続けるタスク |
 | 端末3 | VM | 1 秒の sleep を繰り返すタスク |
 
@@ -99,7 +99,7 @@ sleep だけを複数起動しても、眠っている間は CPU が空くので
 自作スケジューラでは、一度にタスクへ割り当てる CPU 時間を変更できる。
 この時間を **タイムスライス** と呼ぶ。
 
-Mac 側で `lab/src/bpf/main.bpf.c` を開き、次の行を探す。
+ホスト側で `lab/src/bpf/main.bpf.c` を開き、次の行を探す。
 途中から始める場合は、残したい編集内容を別のファイルへ保存したうえで、`make restore STEP=01` を使う。
 
 ```c
@@ -169,7 +169,7 @@ sudo taskset -c 0 python3 tools/sleep.py --sched-ext
 計算タスクのスライスを短くすると、sleep の表示間隔はどう変わるだろうか。
 二つのタスクと CPU affinity は保ち、スライスだけを変えて試す。
 
-Mac 側で `lab/src/bpf/main.bpf.c` の `slice_ns` を 10 ミリ秒へ変更して保存する。
+ホスト側で `lab/src/bpf/main.bpf.c` の `slice_ns` を 10 ミリ秒へ変更して保存する。
 
 ```c
 const volatile u64 slice_ns = 10000000ULL;  /* 10 milliseconds */
@@ -194,5 +194,5 @@ sudo taskset -c 0 python3 tools/sleep.py --sched-ext
 今回も出力を一行残す。
 
 確認が終わったら、端末3、端末2、端末1の順に `Ctrl+C` で止める。
-端末3で `cat /sys/kernel/sched_ext/state` が `disabled` に戻ったことを確認し、端末2と端末3は `exit` で Mac 側へ戻る。
+端末3で `cat /sys/kernel/sched_ext/state` が `disabled` に戻ったことを確認し、端末2と端末3は `exit` でホスト側へ戻る。
 lab のスライスは、10 ミリ秒のまま保存しておく。

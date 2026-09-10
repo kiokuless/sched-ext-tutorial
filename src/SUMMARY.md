@@ -5,6 +5,7 @@
 # ハンズオン
 
 - [実験環境を準備する](./handson/environment.md)
+  - [Windows で実験環境を準備する](./handson/windows.md)
 - [最初のスケジューラを動かす](./handson/global.md)
 - [1秒後に戻れないタスク](./handson/long-slice.md)
 - [最初の main.bpf.c を読む](./handson/model.md)

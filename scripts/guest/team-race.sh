@@ -8,8 +8,8 @@ if (( $# != 3 )); then
 fi
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-"$repo_root/scripts/guest/build-step.sh" "$1"
-"$repo_root/scripts/guest/build-workload.sh"
+bash "$repo_root/scripts/guest/build-step.sh" "$1"
+bash "$repo_root/scripts/guest/build-workload.sh"
 exec sudo python3 -B "$repo_root/scripts/guest/team_race_experiment.py" \
     --scheduler "/var/cache/sched-ext-tutorial/target/scx-step-$1/release/scx_oreore" \
     --cpu "$2" --a-members "$3"

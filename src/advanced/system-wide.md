@@ -26,7 +26,7 @@ partial mode で fair class に残っていた shell も、system-wide mode で�
 PID の偶奇で分けた二つの DSQ を交互に選び、10 ミリ秒のスライスを割り当てる実装である。
 lab を上書きする必要はない。
 
-端末1（Mac 側のリポジトリ直下）で起動する。
+端末1（ホスト側のリポジトリ直下）で起動する。
 
 ```console
 make run STEP=04 MODE=system
@@ -51,12 +51,12 @@ uname -a
 ## 元へ戻す
 
 端末1で `Ctrl+C` を押す。
-端末2で状態を読み、`disabled` に戻ったことを確認してから Mac 側へ戻る。
+端末2で状態を読み、`disabled` に戻ったことを確認してからホスト側へ戻る。
 
 ```console
 cat /sys/kernel/sched_ext/state
 exit
 ```
 
-操作できない場合に限り、Mac 側の別の端末から `make reset` を実行する。
+操作できない場合に限り、ホスト側の別の端末から `make reset` を実行する。
 対象を広げた影響として、shell を操作した印象を、本編で測った sleep の時間とは分けて記録する。

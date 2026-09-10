@@ -19,7 +19,7 @@ else
         --disk 20G
 fi
 
-VM_NAME="$vm_name" REPO_ROOT="$repo_root" "$repo_root/scripts/vm-mount.sh"
+VM_NAME="$vm_name" REPO_ROOT="$repo_root" bash "$repo_root/scripts/vm-mount.sh"
 
 printf 'VM %s is ready. Run `make vm-bootstrap` on a fresh image.\n' "$vm_name"
 

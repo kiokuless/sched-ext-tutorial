@@ -216,7 +216,7 @@ void BPF_STRUCT_OPS(oreore_dispatch, s32 cpu, struct task_struct *prev)
 
 ## 変更したスケジューラを動かす
 
-編集を保存し、端末1（Mac 側のリポジトリ直下）でロードする。
+編集を保存し、端末1（ホスト側のリポジトリ直下）でロードする。
 
 ```console
 make run STEP=lab MODE=partial
@@ -237,7 +237,7 @@ sudo /var/cache/sched-ext-tutorial/target/workload/release/sched-ext-workload \
 ただし、この出力だけでは、二つの列へ交互に順番が回ることまでは確認できない。
 
 確認が終わったら、端末1で `Ctrl+C` を押す。
-端末2で解除を確認してから、Mac 側へ戻る。
+端末2で解除を確認してから、ホスト側へ戻る。
 
 ```console
 cat /sys/kernel/sched_ext/state
@@ -251,7 +251,7 @@ exit
 各プロセスは単一スレッドで同じ計算を続け、スライスを使い切る。
 
 まず、全員に同じ 10 ミリ秒のスライスを割り当てる一つの FIFO で測る。
-スケジューラを停止した状態から、Mac 側のリポジトリ直下で実行する。
+スケジューラを停止した状態から、ホスト側のリポジトリ直下で実行する。
 
 ```console
 make bench CASE=dsq STEP=03
@@ -294,7 +294,7 @@ PID は起動ごとに変わるが、偶数三つと奇数一つという人数�
 
 ## 完成例と照合する
 
-Mac 側で、完成例との差分を確認する。
+ホスト側で、完成例との差分を確認する。
 
 ```console
 diff -u checkpoints/step-04-shared-dsq/src/bpf/main.bpf.c lab/src/bpf/main.bpf.c

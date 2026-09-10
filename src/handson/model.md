@@ -1,7 +1,7 @@
 # 最初の main.bpf.c を読む
 
 前章で変更した `slice_ns` は、タスクを待ち行列へ入れるときに CPU 時間の割り当てとして使われる。
-その処理が書かれている `lab/src/bpf/main.bpf.c` を、Mac 側のエディタで開く。
+その処理が書かれている `lab/src/bpf/main.bpf.c` を、ホスト側のエディタで開く。
 カーネルがどの関数を呼び、タスクがどの待ち行列を通って実行されるかを追う。
 
 前章の最後まで進めたコードは、`checkpoints/step-03-short-slice/src/bpf/main.bpf.c` と同じ状態になっている。
